@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package demopb;
+
+option go_package = ".;demopb";
+
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+
+service Api {
+
+  rpc ListPersons(ListPersonsRequest) returns (ListPersonsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/persons"
+    };
+  }
+
+  rpc GetPerson(GetPersonRequest) returns (Person) {
+    option (google.api.http) = {
+      get: "/api/v1/persons/{person_id}"
+    };
+  }
+
+}
+
+message Person {
+  enum Type {
+    individual = 0;
+    company = 1;
+  }
+  string id    = 1;
+  string name  = 2;
+  string email = 3;
+  Type type = 4;
+}
+
+message ListPersonsRequest {
+  google.protobuf.StringValue project_id = 1;
+
+  google.protobuf.Int32Value page      = 10;
+  google.protobuf.Int32Value page_size = 11;
+}
+
+message ListPersonsResponse {
+  repeated Person persons = 1;
+
+  uint32 total_count = 10;
+}
+
+message GetPersonRequest {
+  string person_id = 1;
+}
