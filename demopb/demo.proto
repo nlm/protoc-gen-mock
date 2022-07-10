@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package demopb;
 
-option go_package = ".;demopb";
+option go_package = "github.com/nlm/protoc-gen-mock/demopb";
 
 import "google/protobuf/wrappers.proto";
 // import "google/protobuf/empty.proto";

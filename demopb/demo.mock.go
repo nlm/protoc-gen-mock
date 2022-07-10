@@ -4,18 +4,18 @@
 package demopb
 
 import (
-	"context"
-	"errors"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/genproto/googleapis/rpc/status"
+	context "context"
+	errors "errors"
+	grpc "google.golang.org/grpc"
+	protojson "google.golang.org/protobuf/encoding/protojson"
+	status "google.golang.org/genproto/googleapis/rpc/status"
 	spb "google.golang.org/grpc/status"
 )
 
 var (
-	ErrEmptyResponse = errors.New("empty response to register")
 	ErrWrongArgType  = errors.New("wrong argument type for this method")
 	ErrUnknownMethod = errors.New("unknown method name")
+	ErrEmptyResponse = errors.New("empty response to register")
 )
 
 type MockApiServer struct {
