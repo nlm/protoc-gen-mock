@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0
-	gitlab.infra.online.net/protobuf/go v1.2558.0
 	google.golang.org/api v0.86.0
 	google.golang.org/genproto v0.0.0-20220708155623-50e5f4832e73
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

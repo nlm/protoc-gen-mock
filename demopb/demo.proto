@@ -5,6 +5,7 @@ package demopb;
 option go_package = ".;demopb";
 
 import "google/protobuf/wrappers.proto";
+// import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
 service Api {
@@ -21,6 +22,19 @@ service Api {
     };
   }
 
+  rpc CreatePerson(CreatePersonRequest) returns (Person) {
+    option (google.api.http) = {
+      post: "/api/v1/persons"
+      body: "*"
+    };
+  }
+
+  rpc DeletePerson(DeletePersonRequest) returns (Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/persons/{person_id}"
+    };
+  }
+
 }
 
 message Person {
@@ -32,6 +46,10 @@ message Person {
   string name  = 2;
   string email = 3;
   Type type = 4;
+}
+
+message Empty {
+  // due to shortcomings in the current implementation of protoc-gen-mock
 }
 
 message ListPersonsRequest {
@@ -47,6 +65,15 @@ message ListPersonsResponse {
   uint32 total_count = 10;
 }
 
-message GetPersonRequest {
+message GetPersonRequest { 
+  string person_id = 1;
+}
+
+message CreatePersonRequest {
+  google.protobuf.StringValue project_id = 1;
+  Person person = 2;
+}
+
+message DeletePersonRequest { 
   string person_id = 1;
 }
