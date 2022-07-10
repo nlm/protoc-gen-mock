@@ -7,7 +7,7 @@ endpoints:
       persons:
       - name: "Alice"
         email: "alice@example.com"
-        wtf: "wtf"
+        #wtf: "wtf"
       - name: "Bob"
       total_count: 2
   CreatePerson:

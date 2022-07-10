@@ -6,7 +6,6 @@ package demopb
 import (
 	"context"
 	"errors"
-	"log"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -14,9 +13,9 @@ import (
 )
 
 var (
+	ErrEmptyResponse = errors.New("empty response to register")
 	ErrWrongArgType  = errors.New("wrong argument type for this method")
 	ErrUnknownMethod = errors.New("unknown method name")
-	ErrEmptyResponse = errors.New("empty response to register")
 )
 
 type MockApiServer struct {
@@ -25,11 +24,13 @@ type MockApiServer struct {
 		ListPersons  *ListPersonsResponse
 		GetPerson    *Person
 		CreatePerson *Person
+		DeletePerson *Empty
 	}
 	errors struct {
 		ListPersons  error
 		GetPerson    error
 		CreatePerson error
+		DeletePerson error
 	}
 }
 
@@ -62,6 +63,15 @@ func (ms *MockApiServer) RegisterMockResponse(method string, response any) error
 		default:
 			return ErrWrongArgType
 		}
+	case "DeletePerson":
+		switch r := response.(type) {
+		case error:
+			ms.errors.DeletePerson = r
+		case *Empty:
+			ms.contents.DeletePerson = r
+		default:
+			return ErrWrongArgType
+		}
 	default:
 		return ErrUnknownMethod
 	}
@@ -70,29 +80,32 @@ func (ms *MockApiServer) RegisterMockResponse(method string, response any) error
 
 // RegisterJSONMockContent registers a JSON string as a Mock content,
 // making sure that the format is respected
-func (ms *MockApiServer) RegisterJSONMockContent(method string, response []byte) error {
+func (ms *MockApiServer) RegisterJSONMockContent(method string, payload []byte) error {
 	switch method {
 	case "ListPersons":
 		var content = new(ListPersonsResponse)
-		log.Print(string(response))
-		if err := protojson.Unmarshal(response, content); err != nil {
+		if err := protojson.Unmarshal(payload, content); err != nil {
 			return err
 		}
 		ms.contents.ListPersons = content
 	case "GetPerson":
 		var content = new(Person)
-		log.Print(string(response))
-		if err := protojson.Unmarshal(response, content); err != nil {
+		if err := protojson.Unmarshal(payload, content); err != nil {
 			return err
 		}
 		ms.contents.GetPerson = content
 	case "CreatePerson":
 		var content = new(Person)
-		log.Print(string(response))
-		if err := protojson.Unmarshal(response, content); err != nil {
+		if err := protojson.Unmarshal(payload, content); err != nil {
 			return err
 		}
 		ms.contents.CreatePerson = content
+	case "DeletePerson":
+		var content = new(Empty)
+		if err := protojson.Unmarshal(payload, content); err != nil {
+			return err
+		}
+		ms.contents.DeletePerson = content
 	default:
 		return ErrUnknownMethod
 	}
@@ -101,26 +114,32 @@ func (ms *MockApiServer) RegisterJSONMockContent(method string, response []byte)
 
 // RegisterJSONMockStatus registers a JSON string as a Mock status,
 // making sure that the format is respected
-func (ms *MockApiServer) RegisterJSONMockStatus(method string, response []byte) error {
+func (ms *MockApiServer) RegisterJSONMockStatus(method string, payload []byte) error {
 	switch method {
 	case "ListPersons":
 		var sta = new(status.Status)
-		if err := protojson.Unmarshal(response, sta); err != nil {
+		if err := protojson.Unmarshal(payload, sta); err != nil {
 			return err
 		}
 		ms.errors.ListPersons = spb.ErrorProto(sta)
 	case "GetPerson":
 		var sta = new(status.Status)
-		if err := protojson.Unmarshal(response, sta); err != nil {
+		if err := protojson.Unmarshal(payload, sta); err != nil {
 			return err
 		}
 		ms.errors.GetPerson = spb.ErrorProto(sta)
 	case "CreatePerson":
 		var sta = new(status.Status)
-		if err := protojson.Unmarshal(response, sta); err != nil {
+		if err := protojson.Unmarshal(payload, sta); err != nil {
 			return err
 		}
 		ms.errors.CreatePerson = spb.ErrorProto(sta)
+	case "DeletePerson":
+		var sta = new(status.Status)
+		if err := protojson.Unmarshal(payload, sta); err != nil {
+			return err
+		}
+		ms.errors.DeletePerson = spb.ErrorProto(sta)
 	default:
 		return ErrUnknownMethod
 	}
@@ -165,6 +184,15 @@ func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequ
 		Email: "string",
 		Type:  0,
 	}, nil
+}
+func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequest) (*Empty, error) {
+	if ms.errors.DeletePerson != nil {
+		return nil, ms.errors.DeletePerson
+	}
+	if ms.contents.DeletePerson != nil {
+		return ms.contents.DeletePerson, nil
+	}
+	return &Empty{}, nil
 }
 func RegisterMockApiServer(s grpc.ServiceRegistrar) *MockApiServer {
 	ms := &MockApiServer{}

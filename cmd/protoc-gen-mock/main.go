@@ -9,15 +9,6 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-type Import struct {
-	Alias string
-	Name  string
-}
-
-func (i Import) String() string {
-	return fmt.Sprintf("%s \"%s\"", i.Alias, i.Name)
-}
-
 var generatedErrors = map[string]string{
 	"ErrWrongArgType":  "wrong argument type for this method",
 	"ErrUnknownMethod": "unknown method name",
@@ -27,13 +18,10 @@ var generatedErrors = map[string]string{
 var generatedImports = []Import{
 	{Name: "context"},
 	{Name: "errors"},
-	{Name: "log"},
-	// {Name: "encoding/json"},
 	{Name: "google.golang.org/grpc"},
 	{Name: "google.golang.org/protobuf/encoding/protojson"},
 	{Name: "google.golang.org/genproto/googleapis/rpc/status"},
 	{Name: "google.golang.org/grpc/status", Alias: "spb"},
-	// {Name: "github.com/nlm/protoc-gen-mock/pkg/scenariopb"},
 }
 
 func KindDefaultValue(kind protoreflect.Kind) string {
@@ -96,8 +84,6 @@ func genErrors(file *protogen.File, genFile *protogen.GeneratedFile) error {
 	genFile.P(")")
 	return nil
 }
-
-type GenFunc func(file *protogen.File, genFile *protogen.GeneratedFile) error
 
 func Generate(gen *protogen.Plugin) error {
 	log.Print("----- START PLUGIN -----")
@@ -163,16 +149,15 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("return nil")
 			genFile.P("}")
 
-			// XXXXXX
+			// RegisterJSONMockContent
 			genFile.P("// RegisterJSONMockContent registers a JSON string as a Mock content,")
 			genFile.P("// making sure that the format is respected")
-			genFile.P("func (ms *", mockServerName, ") RegisterJSONMockContent(method string, response []byte) error {")
+			genFile.P("func (ms *", mockServerName, ") RegisterJSONMockContent(method string, payload []byte) error {")
 			genFile.P("switch method {")
 			for _, m := range s.Methods {
 				genFile.P("case \"", m.GoName, "\":")
 				genFile.P("var content = new(", m.Output.GoIdent.GoName, ")")
-				genFile.P("log.Print(string(response))")
-				genFile.P("if err := protojson.Unmarshal(response, content); err != nil {")
+				genFile.P("if err := protojson.Unmarshal(payload, content); err != nil {")
 				genFile.P("return err")
 				genFile.P("}")
 				genFile.P("ms.contents.", m.GoName, " = content")
@@ -182,17 +167,16 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("}")
 			genFile.P("return nil")
 			genFile.P("}")
-			// XXXXXX
 
-			// XXXXXX2
+			// RegisterJSONMockStatus
 			genFile.P("// RegisterJSONMockStatus registers a JSON string as a Mock status,")
 			genFile.P("// making sure that the format is respected")
-			genFile.P("func (ms *", mockServerName, ") RegisterJSONMockStatus(method string, response []byte) error {")
+			genFile.P("func (ms *", mockServerName, ") RegisterJSONMockStatus(method string, payload []byte) error {")
 			genFile.P("switch method {")
 			for _, m := range s.Methods {
 				genFile.P("case \"", m.GoName, "\":")
 				genFile.P("var sta = new(status.Status)")
-				genFile.P("if err := protojson.Unmarshal(response, sta); err != nil {")
+				genFile.P("if err := protojson.Unmarshal(payload, sta); err != nil {")
 				genFile.P("return err")
 				genFile.P("}")
 				genFile.P("ms.errors.", m.GoName, " = spb.ErrorProto(sta)")
@@ -202,38 +186,6 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("}")
 			genFile.P("return nil")
 			genFile.P("}")
-			// XXXXXX
-
-			// genFile.P("// RegisterJSONMockResponse registers a JSON string as a Mock response,")
-			// genFile.P("// making sure that the format is respected")
-			// genFile.P("func (ms *", mockServerName, ") RegisterJSONMockResponse(method string, response []byte) error {")
-			// genFile.P("switch method {")
-			// for _, m := range s.Methods {
-			// 	genFile.P("case \"", m.GoName, "\":")
-			// 	genFile.P("type Res struct {")
-			// 	genFile.P("Content *", m.Output.GoIdent.GoName, " `json:\"content,omitempty\"`")
-			// 	genFile.P("Status *status.Status `json:\"status,omitempty\"`")
-			// 	genFile.P("}")
-			// 	genFile.P("")
-			// 	//
-			// 	genFile.P()
-			// 	// genFile.P("res := ", m.Output.GoIdent.GoName, "{}")
-			// 	genFile.P("if err := json.Unmarshal(response, &res); err != nil {")
-			// 	genFile.P("return err")
-			// 	genFile.P("}")
-			// 	genFile.P("if res.Content != nil {")
-			// 	genFile.P("ms.contents.", m.GoName, " = res.Content")
-			// 	genFile.P("} else if res.Status != nil {")
-			// 	genFile.P("ms.errors.", m.GoName, " = spb.ErrorProto(res.Status)")
-			// 	genFile.P("} else {")
-			// 	genFile.P("return ErrEmptyResponse")
-			// 	genFile.P("}")
-			// 	genFile.P("return nil")
-			// }
-			// genFile.P("default:")
-			// genFile.P("return ErrUnknownMethod")
-			// genFile.P("}")
-			// genFile.P("}")
 
 			// Methods
 			for _, m := range s.Methods {

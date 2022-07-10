@@ -1,6 +1,6 @@
 PROG=protoc-gen-mock
 DEMOPB=demopb
-SCENARIOPB=pkg/scenariopb
+SCENARIOPB=pkg/pb/scenariopb
 PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto
 
 .PHONY: build

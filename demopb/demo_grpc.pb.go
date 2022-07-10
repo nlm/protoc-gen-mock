@@ -25,6 +25,7 @@ type ApiClient interface {
 	ListPersons(ctx context.Context, in *ListPersonsRequest, opts ...grpc.CallOption) (*ListPersonsResponse, error)
 	GetPerson(ctx context.Context, in *GetPersonRequest, opts ...grpc.CallOption) (*Person, error)
 	CreatePerson(ctx context.Context, in *CreatePersonRequest, opts ...grpc.CallOption) (*Person, error)
+	DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type apiClient struct {
@@ -62,6 +63,15 @@ func (c *apiClient) CreatePerson(ctx context.Context, in *CreatePersonRequest, o
 	return out, nil
 }
 
+func (c *apiClient) DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/demopb.Api/DeletePerson", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApiServer is the server API for Api service.
 // All implementations must embed UnimplementedApiServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type ApiServer interface {
 	ListPersons(context.Context, *ListPersonsRequest) (*ListPersonsResponse, error)
 	GetPerson(context.Context, *GetPersonRequest) (*Person, error)
 	CreatePerson(context.Context, *CreatePersonRequest) (*Person, error)
+	DeletePerson(context.Context, *DeletePersonRequest) (*Empty, error)
 	mustEmbedUnimplementedApiServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedApiServer) GetPerson(context.Context, *GetPersonRequest) (*Pe
 }
 func (UnimplementedApiServer) CreatePerson(context.Context, *CreatePersonRequest) (*Person, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePerson not implemented")
+}
+func (UnimplementedApiServer) DeletePerson(context.Context, *DeletePersonRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePerson not implemented")
 }
 func (UnimplementedApiServer) mustEmbedUnimplementedApiServer() {}
 
@@ -152,6 +166,24 @@ func _Api_CreatePerson_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Api_DeletePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePersonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).DeletePerson(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demopb.Api/DeletePerson",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).DeletePerson(ctx, req.(*DeletePersonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Api_ServiceDesc is the grpc.ServiceDesc for Api service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var Api_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePerson",
 			Handler:    _Api_CreatePerson_Handler,
+		},
+		{
+			MethodName: "DeletePerson",
+			Handler:    _Api_DeletePerson_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
