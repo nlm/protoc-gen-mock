@@ -1,30 +1,48 @@
 PROG=protoc-gen-mock
 DEMOPB=demopb
-PROTOINCLUDE=-I $(DEMOPB) -I ./protobuf/google -I ./protobuf/grpc/src/proto
+SCENARIOPB=pkg/scenariopb
+PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto
 
 .PHONY: build
 
 build: $(PROG)
 
-$(PROG): ./cmd/$(PROG)/*.go
+$(PROG): ./cmd/$(PROG)/*.go $(SCENARIOPB)/scenario.pb.go
 	go build ./cmd/$(PROG)/
 
-.PHONY: proto demoproto demo clean
+$(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
+	protoc -I $(SCENARIOPB) $(PROTOINCLUDE) --go_out=$(SCENARIOPB) scenario.proto
 
-proto: $(DEMOPB)/demo.proto
-	protoc $(PROTOINCLUDE) --go_out=$(DEMOPB) --go-grpc_out=$(DEMOPB) --grpc-gateway_out=$(DEMOPB) demo.proto
+.PHONY: proto
 
-mockproto: $(DEMOPB)/demo.proto $(PROG)
-	protoc $(PROTOINCLUDE) --mock_out=$(DEMOPB) --plugin $(PROG)=$(PROG) demo.proto
+proto: $(DEMOPB)/demo.pb.go $(DEMOPB)/demo_grpc.pb.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo.mock.go
+
+$(DEMOPB)/demo.pb.go: $(DEMOPB)/demo.proto
+	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go_out=$(DEMOPB) demo.proto
+
+$(DEMOPB)/demo_grpc.pb.go: $(DEMOPB)/demo.proto
+	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go-grpc_out=$(DEMOPB) demo.proto
+
+$(DEMOPB)/demo.pb.gw.go: $(DEMOPB)/demo.proto
+	protoc -I $(DEMOPB) $(PROTOINCLUDE) --grpc-gateway_out=$(DEMOPB) demo.proto
+
+$(DEMOPB)/demo.mock.go: $(DEMOPB)/demo.proto $(PROG)
+	protoc -I $(DEMOPB) $(PROTOINCLUDE) --mock_out=$(DEMOPB) --plugin $(PROG)=$(PROG) demo.proto
 	@echo "-----"
 	@cat $(DEMOPB)/demo.mock.go
 	@echo "-----"
 
-rundemo: proto mockproto
+.PHONY: rundemo
+
+rundemo: proto
 	go run ./cmd/demo
 
-rundemogw: proto mockproto
+.PHONY: rundemogw
+
+rundemogw: proto
 	go run ./cmd/demogw
 
+.PHONY: clean
+
 clean:
-	rm -f $(PROG) demo/demo.demo.go
+	rm -f $(PROG)

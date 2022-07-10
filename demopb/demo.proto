@@ -21,6 +21,12 @@ service Api {
     };
   }
 
+  rpc CreatePerson(CreatePersonRequest) returns (Person) {
+    option (google.api.http) = {
+      post: "/api/v1/persons"
+    };
+  }
+
 }
 
 message Person {
@@ -47,6 +53,11 @@ message ListPersonsResponse {
   uint32 total_count = 10;
 }
 
-message GetPersonRequest {
+message GetPersonRequest { 
   string person_id = 1;
+}
+
+message CreatePersonRequest {
+  google.protobuf.StringValue project_id = 1;
+  Person person = 2;
 }

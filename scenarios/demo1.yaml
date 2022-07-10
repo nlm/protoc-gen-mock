@@ -1,0 +1,16 @@
+endpoints:
+  GetPerson:
+    content:
+      name: "John"
+  ListPersons:
+    content:
+      persons:
+      - name: "Alice"
+        email: "alice@example.com"
+        wtf: "wtf"
+      - name: "Bob"
+      total_count: 2
+  CreatePerson:
+    status:
+      code: 8 # ResourceExhausted
+      message: "oops"
