@@ -4,6 +4,10 @@
 package demopb
 
 import (
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+)
+
+import (
 	context "context"
 	errors "errors"
 	grpc "google.golang.org/grpc"
@@ -24,7 +28,7 @@ type MockApiServer struct {
 		ListPersons  *ListPersonsResponse
 		GetPerson    *Person
 		CreatePerson *Person
-		DeletePerson *Empty
+		DeletePerson *emptypb.Empty
 	}
 	errors struct {
 		ListPersons  error
@@ -67,7 +71,7 @@ func (ms *MockApiServer) RegisterMockResponse(method string, response any) error
 		switch r := response.(type) {
 		case error:
 			ms.errors.DeletePerson = r
-		case *Empty:
+		case *emptypb.Empty:
 			ms.contents.DeletePerson = r
 		default:
 			return ErrWrongArgType
@@ -101,7 +105,7 @@ func (ms *MockApiServer) RegisterJSONMockContent(method string, payload []byte) 
 		}
 		ms.contents.CreatePerson = content
 	case "DeletePerson":
-		var content = new(Empty)
+		var content = new(emptypb.Empty)
 		if err := protojson.Unmarshal(payload, content); err != nil {
 			return err
 		}
@@ -185,14 +189,14 @@ func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequ
 		Type:  0,
 	}, nil
 }
-func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequest) (*Empty, error) {
+func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequest) (*emptypb.Empty, error) {
 	if ms.errors.DeletePerson != nil {
 		return nil, ms.errors.DeletePerson
 	}
 	if ms.contents.DeletePerson != nil {
 		return ms.contents.DeletePerson, nil
 	}
-	return &Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 func RegisterMockApiServer(s grpc.ServiceRegistrar) *MockApiServer {
 	ms := &MockApiServer{}

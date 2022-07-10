@@ -49,13 +49,13 @@ func genErrors(file *protogen.File, genFile *protogen.GeneratedFile) error {
 }
 
 func Generate(gen *protogen.Plugin) error {
-	log.Print("----- START PLUGIN -----")
+	log.Print("----- BEGIN PLUGIN -----")
 	for _, file := range gen.Files {
 		if !file.Generate {
 			continue
 		}
 		fileName := file.GeneratedFilenamePrefix + ".mock.go"
-		genFile := gen.NewGeneratedFile(fileName, "")
+		genFile := gen.NewGeneratedFile(fileName, file.GoImportPath)
 		log.Print("----- BEGIN FILE ", file.Desc.Path(), " -----")
 
 		generators := []GenFunc{
@@ -81,7 +81,7 @@ func Generate(gen *protogen.Plugin) error {
 			// contents
 			genFile.P("contents struct {")
 			for _, m := range s.Methods {
-				genFile.P(m.GoName, " *", m.Output.GoIdent.GoName)
+				genFile.P(m.GoName, " *", genFile.QualifiedGoIdent(m.Output.GoIdent))
 			}
 			genFile.P("}")
 			// errors
@@ -100,7 +100,7 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("switch r := response.(type) {")
 				genFile.P("case error:")
 				genFile.P("ms.errors.", m.GoName, " = r")
-				genFile.P("case *", m.Output.GoIdent.GoName, ":")
+				genFile.P("case *", genFile.QualifiedGoIdent(m.Output.GoIdent), ":")
 				genFile.P("ms.contents.", m.GoName, " = r")
 				genFile.P("default:")
 				genFile.P("return ErrWrongArgType")
@@ -119,7 +119,7 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("switch method {")
 			for _, m := range s.Methods {
 				genFile.P("case \"", m.GoName, "\":")
-				genFile.P("var content = new(", m.Output.GoIdent.GoName, ")")
+				genFile.P("var content = new(", genFile.QualifiedGoIdent(m.Output.GoIdent), ")")
 				genFile.P("if err := protojson.Unmarshal(payload, content); err != nil {")
 				genFile.P("return err")
 				genFile.P("}")
@@ -152,7 +152,7 @@ func Generate(gen *protogen.Plugin) error {
 
 			// Mocked Methods
 			for _, m := range s.Methods {
-				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(ctx context.Context, req *", m.Input.GoIdent.GoName, ") (*", m.Output.GoIdent.GoName, ", error) {")
+				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(ctx context.Context, req *", genFile.QualifiedGoIdent(m.Input.GoIdent), ") (*", genFile.QualifiedGoIdent(m.Output.GoIdent), ", error) {")
 
 				// check registered errors
 				genFile.P("if ms.errors.", m.GoName, " != nil {")
@@ -165,7 +165,7 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("}")
 
 				// return defaut value
-				genFile.P("return &", m.Output.GoIdent.GoName, "{")
+				genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
 				for _, f := range m.Output.Fields {
 					// o := f.Desc.Options().ProtoReflect().GetUnknown()
 					// genFile.P("// Options: ", o, " ", o.IsValid())
@@ -183,12 +183,6 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("}")
 		}
 
-		// genFile.P("import \"fmt\"")
-		// for _, message := range file.Messages {
-		// 	genFile.P("func (*", message.GoIdent.GoName, ") HelloWorld() {")
-		// 	genFile.P("fmt.Println(\"Hello, ", message.GoIdent.GoName, "!\")")
-		// 	genFile.P("}")
-		// }
 		log.Print("----- END FILE ", file.Desc.Path(), " -----")
 	}
 	log.Print("----- END PLUGIN -----")

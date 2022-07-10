@@ -35,7 +35,7 @@ $(DEMOPB)/demo.mock.go: $(DEMOPB)/demo.proto $(PROG)
 .PHONY: rundemo
 
 rundemo: proto
-	go run ./cmd/demo
+	go run ./cmd/demo -scenario ./scenarios/demo1.yaml
 
 .PHONY: rundemogw
 
@@ -46,3 +46,9 @@ rundemogw: proto
 
 clean:
 	rm -f $(PROG)
+
+.PHONY: protoclean
+
+protoclean:
+	rm -f $(DEMOPB)/demo.pb.go $(DEMOPB)/demo.mock.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo_grpc.pb.go
+	rm -f $(SCENARIOPB)/scenario.pb.go

@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,7 +26,7 @@ type ApiClient interface {
 	ListPersons(ctx context.Context, in *ListPersonsRequest, opts ...grpc.CallOption) (*ListPersonsResponse, error)
 	GetPerson(ctx context.Context, in *GetPersonRequest, opts ...grpc.CallOption) (*Person, error)
 	CreatePerson(ctx context.Context, in *CreatePersonRequest, opts ...grpc.CallOption) (*Person, error)
-	DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type apiClient struct {
@@ -63,8 +64,8 @@ func (c *apiClient) CreatePerson(ctx context.Context, in *CreatePersonRequest, o
 	return out, nil
 }
 
-func (c *apiClient) DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *apiClient) DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/demopb.Api/DeletePerson", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -79,7 +80,7 @@ type ApiServer interface {
 	ListPersons(context.Context, *ListPersonsRequest) (*ListPersonsResponse, error)
 	GetPerson(context.Context, *GetPersonRequest) (*Person, error)
 	CreatePerson(context.Context, *CreatePersonRequest) (*Person, error)
-	DeletePerson(context.Context, *DeletePersonRequest) (*Empty, error)
+	DeletePerson(context.Context, *DeletePersonRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApiServer()
 }
 
@@ -96,7 +97,7 @@ func (UnimplementedApiServer) GetPerson(context.Context, *GetPersonRequest) (*Pe
 func (UnimplementedApiServer) CreatePerson(context.Context, *CreatePersonRequest) (*Person, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePerson not implemented")
 }
-func (UnimplementedApiServer) DeletePerson(context.Context, *DeletePersonRequest) (*Empty, error) {
+func (UnimplementedApiServer) DeletePerson(context.Context, *DeletePersonRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePerson not implemented")
 }
 func (UnimplementedApiServer) mustEmbedUnimplementedApiServer() {}
