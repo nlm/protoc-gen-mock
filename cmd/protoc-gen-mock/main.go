@@ -1,62 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-var generatedErrors = map[string]string{
-	"ErrWrongArgType":  "wrong argument type for this method",
-	"ErrUnknownMethod": "unknown method name",
-	"ErrEmptyResponse": "empty response to register",
+var generatedErrors = []ErrorDecl{
+	{"ErrWrongArgType", "wrong argument type for this method"},
+	{"ErrUnknownMethod", "unknown method name"},
+	{"ErrEmptyResponse", "empty response to register"},
 }
 
-var generatedImports = []Import{
-	{Name: "context"},
-	{Name: "errors"},
-	{Name: "google.golang.org/grpc"},
-	{Name: "google.golang.org/protobuf/encoding/protojson"},
-	{Name: "google.golang.org/genproto/googleapis/rpc/status"},
-	{Name: "google.golang.org/grpc/status", Alias: "spb"},
-}
-
-func KindDefaultValue(kind protoreflect.Kind) string {
-	switch kind {
-	case protoreflect.BoolKind:
-		return fmt.Sprint(false)
-	case protoreflect.StringKind:
-		return "\"string\""
-	case protoreflect.BytesKind:
-		return "[]byte(\"bytes\")"
-	case protoreflect.EnumKind:
-		return "0"
-	case protoreflect.DoubleKind,
-		protoreflect.Fixed32Kind,
-		protoreflect.Fixed64Kind,
-		protoreflect.FloatKind,
-		protoreflect.Int32Kind,
-		protoreflect.Int64Kind,
-		protoreflect.Sfixed32Kind,
-		protoreflect.Sfixed64Kind,
-		protoreflect.Sint32Kind,
-		protoreflect.Sint64Kind,
-		protoreflect.Uint32Kind,
-		protoreflect.Uint64Kind:
-		return "0"
-	case protoreflect.MessageKind:
-		// FIXME
-		return "nil"
-	default:
-		return ""
-	}
-}
-
-func MockFieldValue(field *protogen.Field) string {
-	return KindDefaultValue(field.Desc.Kind())
+var generatedImports = []ImportDecl{
+	{"context", "context"},
+	{"errors", "errors"},
+	{"grpc", "google.golang.org/grpc"},
+	{"protojson", "google.golang.org/protobuf/encoding/protojson"},
+	{"status", "google.golang.org/genproto/googleapis/rpc/status"},
+	{"spb", "google.golang.org/grpc/status"},
 }
 
 func genHeader(file *protogen.File, genFile *protogen.GeneratedFile) error {
@@ -69,8 +32,8 @@ func genHeader(file *protogen.File, genFile *protogen.GeneratedFile) error {
 
 func genImports(file *protogen.File, genFile *protogen.GeneratedFile) error {
 	genFile.P("import (")
-	for _, i := range generatedImports {
-		genFile.P(i)
+	for _, gi := range generatedImports {
+		genFile.P(gi)
 	}
 	genFile.P(")")
 	return nil
@@ -78,21 +41,21 @@ func genImports(file *protogen.File, genFile *protogen.GeneratedFile) error {
 
 func genErrors(file *protogen.File, genFile *protogen.GeneratedFile) error {
 	genFile.P("var (")
-	for name, desc := range generatedErrors {
-		genFile.P(name, " = errors.New(\"", desc, "\")")
+	for _, ge := range generatedErrors {
+		genFile.P(ge)
 	}
 	genFile.P(")")
 	return nil
 }
 
 func Generate(gen *protogen.Plugin) error {
-	log.Print("----- START PLUGIN -----")
+	log.Print("----- BEGIN PLUGIN -----")
 	for _, file := range gen.Files {
 		if !file.Generate {
 			continue
 		}
 		fileName := file.GeneratedFilenamePrefix + ".mock.go"
-		genFile := gen.NewGeneratedFile(fileName, "")
+		genFile := gen.NewGeneratedFile(fileName, file.GoImportPath)
 		log.Print("----- BEGIN FILE ", file.Desc.Path(), " -----")
 
 		generators := []GenFunc{
@@ -118,7 +81,7 @@ func Generate(gen *protogen.Plugin) error {
 			// contents
 			genFile.P("contents struct {")
 			for _, m := range s.Methods {
-				genFile.P(m.GoName, " *", m.Output.GoIdent.GoName)
+				genFile.P(m.GoName, " *", genFile.QualifiedGoIdent(m.Output.GoIdent))
 			}
 			genFile.P("}")
 			// errors
@@ -137,7 +100,7 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("switch r := response.(type) {")
 				genFile.P("case error:")
 				genFile.P("ms.errors.", m.GoName, " = r")
-				genFile.P("case *", m.Output.GoIdent.GoName, ":")
+				genFile.P("case *", genFile.QualifiedGoIdent(m.Output.GoIdent), ":")
 				genFile.P("ms.contents.", m.GoName, " = r")
 				genFile.P("default:")
 				genFile.P("return ErrWrongArgType")
@@ -156,7 +119,7 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("switch method {")
 			for _, m := range s.Methods {
 				genFile.P("case \"", m.GoName, "\":")
-				genFile.P("var content = new(", m.Output.GoIdent.GoName, ")")
+				genFile.P("var content = new(", genFile.QualifiedGoIdent(m.Output.GoIdent), ")")
 				genFile.P("if err := protojson.Unmarshal(payload, content); err != nil {")
 				genFile.P("return err")
 				genFile.P("}")
@@ -187,9 +150,9 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("return nil")
 			genFile.P("}")
 
-			// Methods
+			// Mocked Methods
 			for _, m := range s.Methods {
-				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(ctx context.Context, req *", m.Input.GoIdent.GoName, ") (*", m.Output.GoIdent.GoName, ", error) {")
+				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(ctx context.Context, req *", genFile.QualifiedGoIdent(m.Input.GoIdent), ") (*", genFile.QualifiedGoIdent(m.Output.GoIdent), ", error) {")
 
 				// check registered errors
 				genFile.P("if ms.errors.", m.GoName, " != nil {")
@@ -202,7 +165,7 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("}")
 
 				// return defaut value
-				genFile.P("return &", m.Output.GoIdent.GoName, "{")
+				genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
 				for _, f := range m.Output.Fields {
 					// o := f.Desc.Options().ProtoReflect().GetUnknown()
 					// genFile.P("// Options: ", o, " ", o.IsValid())
@@ -220,12 +183,6 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("}")
 		}
 
-		// genFile.P("import \"fmt\"")
-		// for _, message := range file.Messages {
-		// 	genFile.P("func (*", message.GoIdent.GoName, ") HelloWorld() {")
-		// 	genFile.P("fmt.Println(\"Hello, ", message.GoIdent.GoName, "!\")")
-		// 	genFile.P("}")
-		// }
 		log.Print("----- END FILE ", file.Desc.Path(), " -----")
 	}
 	log.Print("----- END PLUGIN -----")
