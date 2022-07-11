@@ -3,10 +3,9 @@ module github.com/nlm/protoc-gen-mock
 go 1.18
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.17.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.9
-	golang.org/x/text v0.3.7
 	google.golang.org/api v0.86.0
 	google.golang.org/genproto v0.0.0-20220708155623-50e5f4832e73
 	google.golang.org/grpc v1.47.0
@@ -24,5 +23,6 @@ require (
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2 // indirect
 	golang.org/x/sys v0.0.0-20220624220833-87e55d714810 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )

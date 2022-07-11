@@ -1,8 +1,7 @@
 package protomock
 
 import (
-	"fmt"
-
+	fake "github.com/brianvoe/gofakeit/v6"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -10,13 +9,13 @@ import (
 func KindDefaultValue(kind protoreflect.Kind) string {
 	switch kind {
 	case protoreflect.BoolKind:
-		return fmt.Sprint(false)
+		return S([...]bool{false, true}[fake.Number(0, 1)])
 	case protoreflect.StringKind:
-		return "\"string\""
+		return Q(fake.LoremIpsumSentence(5))
 	case protoreflect.BytesKind:
-		return "[]byte(\"bytes\")"
+		return S("[]byte(\"" + fake.LoremIpsumSentence(5) + "\")")
 	case protoreflect.EnumKind:
-		return "0"
+		return S(0)
 	case protoreflect.DoubleKind,
 		protoreflect.Fixed32Kind,
 		protoreflect.Fixed64Kind,
@@ -29,7 +28,7 @@ func KindDefaultValue(kind protoreflect.Kind) string {
 		protoreflect.Sint64Kind,
 		protoreflect.Uint32Kind,
 		protoreflect.Uint64Kind:
-		return "0"
+		return S(0)
 	case protoreflect.MessageKind:
 		// FIXME
 		return "nil"

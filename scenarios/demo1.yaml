@@ -13,7 +13,7 @@ endpoints:
         name: "Bob"
         email: "bob@example.com"
       total_count: 2
-  CreatePerson:
+  DeletePerson:
     status:
-      code: 8 # ResourceExhausted
+      code: 7 # PermissionDenied
       message: "oops"
