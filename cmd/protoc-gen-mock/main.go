@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/nlm/protoc-gen-mock/pkg/protomock"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -196,7 +197,7 @@ func Generate(gen *protogen.Plugin) error {
 				// return defaut value
 				genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
 				for _, f := range m.Output.Fields {
-					genFile.P(f.GoName, ": ", MockFieldValue(f), ",")
+					genFile.P(f.GoName, ": ", protomock.MockFieldValue(f), ",")
 				}
 				genFile.P("}, nil")
 				genFile.P("}")

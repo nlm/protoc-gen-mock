@@ -3,13 +3,14 @@ package main
 import (
 	"github.com/google/uuid"
 	"github.com/nlm/protoc-gen-mock/demopb"
+	"github.com/nlm/protoc-gen-mock/pkg/protomock"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 func init() {
-	RegisterFieldValueMocker(demopbFieldValueMocker)
+	protomock.RegisterFieldValueMocker(demopbFieldValueMocker)
 }
 
 func demopbFieldValueMocker(field *protogen.Field) string {

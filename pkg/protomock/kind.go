@@ -1,4 +1,4 @@
-package main
+package protomock
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func ProtoKindDefaultValue(kind protoreflect.Kind) string {
+func KindDefaultValue(kind protoreflect.Kind) string {
 	switch kind {
 	case protoreflect.BoolKind:
 		return fmt.Sprint(false)
@@ -38,23 +38,6 @@ func ProtoKindDefaultValue(kind protoreflect.Kind) string {
 	}
 }
 
-func defaultFieldValueMocker(field *protogen.Field) string {
-	return ProtoKindDefaultValue(field.Desc.Kind())
-}
-
-type FieldValueMocker func(*protogen.Field) string
-
-var fieldValueMockers []FieldValueMocker
-
-func RegisterFieldValueMocker(fvm FieldValueMocker) {
-	fieldValueMockers = append(fieldValueMockers, fvm)
-}
-
-func MockFieldValue(field *protogen.Field) string {
-	for _, fvm := range fieldValueMockers {
-		if value := fvm(field); value != "" {
-			return value
-		}
-	}
-	return defaultFieldValueMocker(field)
+func kindDefaultValueMocker(field *protogen.Field) string {
+	return KindDefaultValue(field.Desc.Kind())
 }
