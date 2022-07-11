@@ -1,0 +1,33 @@
+syntax = "proto3";
+package demopb;
+
+option go_package = ".;demopb";
+
+import "google/protobuf/descriptor.proto";
+
+// StandardFieldType represents a Scaleway standard type.
+// These types are useful to provide context to protobuf generators
+// and therefore, improve the generation.
+enum StandardFieldType {
+  standard_field_type_unknown = 0;
+  ip                          = 1;
+  ipv4                        = 2;
+  ipv6                        = 3;
+  size                        = 4;
+  uuid                        = 5;
+  ipnet                       = 6;
+  mac_address                 = 7;
+}
+
+// https://developers.google.com/protocol-buffers/docs/proto#customoptions
+extend google.protobuf.FieldOptions {
+  // Type specify the standard type of a field.
+  // On a map field, this annotation will target only the value type.
+  StandardFieldType type = 50000;
+}
+
+// https://developers.google.com/protocol-buffers/docs/proto#customoptions
+extend google.protobuf.EnumValueOptions {
+  // Transient indicates a case is not final.
+  bool transient = 50001;
+}

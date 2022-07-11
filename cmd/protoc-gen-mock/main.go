@@ -90,9 +90,16 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P(m.GoName, " error")
 			}
 			genFile.P("}")
+			// callbacks
+			genFile.P("callbacks struct {")
+			for _, m := range s.Methods {
+				genFile.P(m.GoName, " func(*", mockServerName, ")")
+			}
+			genFile.P("}")
 			genFile.P("}")
 
 			// RegisterMockResponse
+			genFile.P("// RegisterMockResponse registers a response that is return at method invocation.")
 			genFile.P("func (ms *", mockServerName, ") RegisterMockResponse(method string, response any) error {")
 			genFile.P("switch method {")
 			for _, m := range s.Methods {
@@ -105,6 +112,20 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("default:")
 				genFile.P("return ErrWrongArgType")
 				genFile.P("}")
+			}
+			genFile.P("default:")
+			genFile.P("return ErrUnknownMethod")
+			genFile.P("}")
+			genFile.P("return nil")
+			genFile.P("}")
+
+			// RegisterMockCallback
+			genFile.P("// RegisterMockCallback registers a callback that is called after method invocation.")
+			genFile.P("func (ms *", mockServerName, ") RegisterMockCallback(method string, callback func(*", mockServerName, ")) error {")
+			genFile.P("switch method {")
+			for _, m := range s.Methods {
+				genFile.P("case \"", m.GoName, "\":")
+				genFile.P("ms.callbacks.", m.GoName, " = callback")
 			}
 			genFile.P("default:")
 			genFile.P("return ErrUnknownMethod")
@@ -152,7 +173,15 @@ func Generate(gen *protogen.Plugin) error {
 
 			// Mocked Methods
 			for _, m := range s.Methods {
-				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(ctx context.Context, req *", genFile.QualifiedGoIdent(m.Input.GoIdent), ") (*", genFile.QualifiedGoIdent(m.Output.GoIdent), ", error) {")
+				genFile.P("func (ms *", mockServerName, ") ", m.GoName, "(",
+					"ctx context.Context,",
+					"req *", genFile.QualifiedGoIdent(m.Input.GoIdent), ")",
+					"(*", genFile.QualifiedGoIdent(m.Output.GoIdent), ", error) {")
+
+				// defer callback if present
+				genFile.P("if ms.callbacks.", m.GoName, " != nil {")
+				genFile.P("defer ms.callbacks.", m.GoName, "(ms)")
+				genFile.P("}")
 
 				// check registered errors
 				genFile.P("if ms.errors.", m.GoName, " != nil {")
@@ -167,12 +196,11 @@ func Generate(gen *protogen.Plugin) error {
 				// return defaut value
 				genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
 				for _, f := range m.Output.Fields {
-					// o := f.Desc.Options().ProtoReflect().GetUnknown()
-					// genFile.P("// Options: ", o, " ", o.IsValid())
 					genFile.P(f.GoName, ": ", MockFieldValue(f), ",")
 				}
 				genFile.P("}, nil")
 				genFile.P("}")
+				genFile.P("")
 			}
 
 			// func RegisterXServer()

@@ -7,6 +7,7 @@ option go_package = ".;demopb";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
+import "annotations.proto";
 
 service Api {
 
@@ -42,14 +43,14 @@ message Person {
     individual = 0;
     company = 1;
   }
-  string id    = 1;
+  string id    = 1 [(demopb.type) = uuid];
   string name  = 2;
   string email = 3;
   Type type = 4;
 }
 
 message ListPersonsRequest {
-  google.protobuf.StringValue project_id = 1;
+  google.protobuf.StringValue project_id = 1 [(demopb.type) = uuid];
 
   google.protobuf.Int32Value page      = 10;
   google.protobuf.Int32Value page_size = 11;

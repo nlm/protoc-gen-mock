@@ -36,8 +36,15 @@ type MockApiServer struct {
 		CreatePerson error
 		DeletePerson error
 	}
+	callbacks struct {
+		ListPersons  func(*MockApiServer)
+		GetPerson    func(*MockApiServer)
+		CreatePerson func(*MockApiServer)
+		DeletePerson func(*MockApiServer)
+	}
 }
 
+// RegisterMockResponse registers a response that is return at method invocation.
 func (ms *MockApiServer) RegisterMockResponse(method string, response any) error {
 	switch method {
 	case "ListPersons":
@@ -76,6 +83,23 @@ func (ms *MockApiServer) RegisterMockResponse(method string, response any) error
 		default:
 			return ErrWrongArgType
 		}
+	default:
+		return ErrUnknownMethod
+	}
+	return nil
+}
+
+// RegisterMockCallback registers a callback that is called after method invocation.
+func (ms *MockApiServer) RegisterMockCallback(method string, callback func(*MockApiServer)) error {
+	switch method {
+	case "ListPersons":
+		ms.callbacks.ListPersons = callback
+	case "GetPerson":
+		ms.callbacks.GetPerson = callback
+	case "CreatePerson":
+		ms.callbacks.CreatePerson = callback
+	case "DeletePerson":
+		ms.callbacks.DeletePerson = callback
 	default:
 		return ErrUnknownMethod
 	}
@@ -150,6 +174,9 @@ func (ms *MockApiServer) RegisterJSONMockStatus(method string, payload []byte) e
 	return nil
 }
 func (ms *MockApiServer) ListPersons(ctx context.Context, req *ListPersonsRequest) (*ListPersonsResponse, error) {
+	if ms.callbacks.ListPersons != nil {
+		defer ms.callbacks.ListPersons(ms)
+	}
 	if ms.errors.ListPersons != nil {
 		return nil, ms.errors.ListPersons
 	}
@@ -161,7 +188,11 @@ func (ms *MockApiServer) ListPersons(ctx context.Context, req *ListPersonsReques
 		TotalCount: 0,
 	}, nil
 }
+
 func (ms *MockApiServer) GetPerson(ctx context.Context, req *GetPersonRequest) (*Person, error) {
+	if ms.callbacks.GetPerson != nil {
+		defer ms.callbacks.GetPerson(ms)
+	}
 	if ms.errors.GetPerson != nil {
 		return nil, ms.errors.GetPerson
 	}
@@ -169,13 +200,17 @@ func (ms *MockApiServer) GetPerson(ctx context.Context, req *GetPersonRequest) (
 		return ms.contents.GetPerson, nil
 	}
 	return &Person{
-		Id:    "string",
-		Name:  "string",
-		Email: "string",
+		Id:    "d3fd3d4a-921f-4ec5-85a5-4b438f7322dc",
+		Name:  "Priceless Germain",
+		Email: "serene.niel@example.com",
 		Type:  0,
 	}, nil
 }
+
 func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequest) (*Person, error) {
+	if ms.callbacks.CreatePerson != nil {
+		defer ms.callbacks.CreatePerson(ms)
+	}
 	if ms.errors.CreatePerson != nil {
 		return nil, ms.errors.CreatePerson
 	}
@@ -183,13 +218,17 @@ func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequ
 		return ms.contents.CreatePerson, nil
 	}
 	return &Person{
-		Id:    "string",
-		Name:  "string",
-		Email: "string",
+		Id:    "fcaa6c2e-2265-4d52-a162-7169bde18653",
+		Name:  "Lucid Liskov",
+		Email: "interesting.gagarin@example.com",
 		Type:  0,
 	}, nil
 }
+
 func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequest) (*emptypb.Empty, error) {
+	if ms.callbacks.DeletePerson != nil {
+		defer ms.callbacks.DeletePerson(ms)
+	}
 	if ms.errors.DeletePerson != nil {
 		return nil, ms.errors.DeletePerson
 	}
@@ -198,6 +237,7 @@ func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequ
 	}
 	return &emptypb.Empty{}, nil
 }
+
 func RegisterMockApiServer(s grpc.ServiceRegistrar) *MockApiServer {
 	ms := &MockApiServer{}
 	RegisterApiServer(s, ms)

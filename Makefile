@@ -2,20 +2,24 @@ PROG=protoc-gen-mock
 DEMOPB=demopb
 SCENARIOPB=pkg/pb/scenariopb
 PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto
+LDFLAGS=-ldflags="-s -w"
 
 .PHONY: build
 
 build: $(PROG)
 
 $(PROG): ./cmd/$(PROG)/*.go $(SCENARIOPB)/scenario.pb.go
-	go build ./cmd/$(PROG)/
+	go build $(LDFLAGS) ./cmd/$(PROG)/
 
 $(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
 	protoc -I $(SCENARIOPB) $(PROTOINCLUDE) --go_out=$(SCENARIOPB) --go_opt=paths=source_relative scenario.proto
 
 .PHONY: proto
 
-proto: $(DEMOPB)/demo.pb.go $(DEMOPB)/demo_grpc.pb.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo.mock.go
+proto: $(DEMOPB)/annotations.pb.go $(DEMOPB)/demo.pb.go $(DEMOPB)/demo_grpc.pb.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo.mock.go
+
+$(DEMOPB)/annotations.pb.go: $(DEMOPB)/annotations.proto
+	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go_out=$(DEMOPB) --go_opt=paths=source_relative annotations.proto
 
 $(DEMOPB)/demo.pb.go: $(DEMOPB)/demo.proto
 	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go_out=$(DEMOPB) --go_opt=paths=source_relative demo.proto

@@ -38,6 +38,23 @@ func ProtoKindDefaultValue(kind protoreflect.Kind) string {
 	}
 }
 
-func MockFieldValue(field *protogen.Field) string {
+func defaultFieldValueMocker(field *protogen.Field) string {
 	return ProtoKindDefaultValue(field.Desc.Kind())
+}
+
+type FieldValueMocker func(*protogen.Field) string
+
+var fieldValueMockers []FieldValueMocker
+
+func RegisterFieldValueMocker(fvm FieldValueMocker) {
+	fieldValueMockers = append(fieldValueMockers, fvm)
+}
+
+func MockFieldValue(field *protogen.Field) string {
+	for _, fvm := range fieldValueMockers {
+		if value := fvm(field); value != "" {
+			return value
+		}
+	}
+	return defaultFieldValueMocker(field)
 }
