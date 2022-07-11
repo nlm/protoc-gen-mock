@@ -200,9 +200,9 @@ func (ms *MockApiServer) GetPerson(ctx context.Context, req *GetPersonRequest) (
 		return ms.contents.GetPerson, nil
 	}
 	return &Person{
-		Id:    "54a00c95-d567-4342-a92c-65eeff197057",
-		Name:  "Sad Neumann",
-		Email: "jolly.easley@example.com",
+		Id:    "afbf64b1-967f-8c53-8872-b44b9fbb971b",
+		Name:  "Epic Perlman",
+		Email: "wonderful.lewin@example.com",
 		Type:  0,
 	}, nil
 }
@@ -218,9 +218,9 @@ func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequ
 		return ms.contents.CreatePerson, nil
 	}
 	return &Person{
-		Id:    "8ec1c882-1c9d-4cb7-bcf0-b547976c51c1",
-		Name:  "Eager Ishizaka",
-		Email: "bold.carson@example.com",
+		Id:    "680c5ba5-3b0d-9f9f-b135-85884c14d6c0",
+		Name:  "Cranky Rhodes",
+		Email: "peaceful.bose@example.com",
 		Type:  0,
 	}, nil
 }

@@ -8,7 +8,7 @@ LDFLAGS=-ldflags="-s -w"
 
 build: $(PROG)
 
-$(PROG): ./cmd/$(PROG)/*.go $(SCENARIOPB)/scenario.pb.go
+$(PROG): ./cmd/$(PROG)/*.go ./pkg/*/*.go $(SCENARIOPB)/scenario.pb.go
 	go build $(LDFLAGS) ./cmd/$(PROG)/
 
 $(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
