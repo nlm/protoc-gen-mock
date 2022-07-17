@@ -10,7 +10,7 @@ const (
 	loremIpsumWordCount = 5
 )
 
-func randomFieldMocker(field protoreflect.FieldDescriptor) any {
+func randomScalarValueMocker(field protoreflect.FieldDescriptor) any {
 	switch field.Kind() {
 	// Scalar Types
 	// https://developers.google.com/protocol-buffers/docs/proto3#scalar
@@ -39,20 +39,15 @@ func randomFieldMocker(field protoreflect.FieldDescriptor) any {
 	case protoreflect.Sfixed64Kind:
 		return int64(Faker().Number(numberLowValue, numberMaxValue))
 	case protoreflect.BoolKind:
-		return [...]bool{false, true}[Faker().Number(0, 1)]
+		return [...]bool{false, true}[int(Faker().Int8()%2)]
 	case protoreflect.StringKind:
 		return string(Faker().LoremIpsumSentence(loremIpsumWordCount))
 	case protoreflect.BytesKind:
 		return []byte(Faker().LoremIpsumSentence(loremIpsumWordCount))
-	// Message Type
-	case protoreflect.MessageKind:
-		return field.Default()
 	// Enum Type
 	case protoreflect.EnumKind:
-		// FIXME
 		return field.DefaultEnumValue()
-
+		// return field.Enum().Values().Get(int(Faker().Int64() % int64(field.Enum().Values().Len()))).Number()
 	}
-	// panic(fmt.Sprintf("unhandled kind: %v", field.Kind().GoString()))
 	return nil
 }

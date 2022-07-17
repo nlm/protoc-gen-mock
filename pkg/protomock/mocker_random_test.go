@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func TestRandomFieldValue(t *testing.T) {
+func TestRandomScalarValueMocker(t *testing.T) {
 	test := testpb.Test{}
 	fields := test.ProtoReflect().Descriptor().Fields()
 
@@ -37,7 +37,7 @@ func TestRandomFieldValue(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			field := fields.ByName(protoreflect.Name(testCase.Name))
 			assert.NotNil(t, field)
-			v := randomFieldMocker(field)
+			v := randomScalarValueMocker(field)
 			assert.NotNil(t, v)
 			switch zeroValue := testCase.Value.(type) {
 			case float32:

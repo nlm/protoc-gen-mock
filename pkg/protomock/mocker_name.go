@@ -31,7 +31,8 @@ func convertNumeral[T float32 | float64 | int | int32 | int64 | uint | uint8 | u
 	panic("invalid conversion")
 }
 
-func nameBasedFieldMocker(field protoreflect.FieldDescriptor) any {
+func nameBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
+	// TODO: handle field.Name == "key" && field.ContainingMessage().IsMapEntry()
 	switch normalizeFieldName(field.Name()) {
 	case "id", "uid", "uuid":
 		switch field.Kind() {
