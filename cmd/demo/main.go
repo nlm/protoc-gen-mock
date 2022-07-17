@@ -17,6 +17,7 @@ var (
 	// flagConfigFile = flag.String("config", "config.yaml", "config file")
 	flagListen   = flag.String("listen", ":9090", "listen address")
 	flagScenario = flag.String("scenario", "", "scenario file")
+	flagRegister = flag.Bool("register", false, "register demo responses")
 )
 
 func main() {
@@ -43,18 +44,20 @@ func main() {
 		}
 	}
 
-	// Direct Registration (JSON).
-	// Used by the Scenario facility to register content and status.
-	ms.RegisterJSONMockContent("GetPerson", []byte(`{"id": "42", "name": "Bob"}`))
+	if *flagRegister {
+		// Direct Registration (JSON).
+		// Used by the Scenario facility to register content and status.
+		ms.RegisterJSONMockContent("GetPerson", []byte(`{"id": "42", "name": "Bob"}`))
 
-	// Direct Registration (Native).
-	// Convenience wrapper giving the ability go register objects, status and errors.
-	ms.RegisterMockResponse("GetPerson", &demopb.Person{
-		Id:    "123",
-		Name:  "John Doe",
-		Email: "jdoe@example.com",
-		Type:  1,
-	})
+		// Direct Registration (Native).
+		// Convenience wrapper giving the ability go register objects, status and errors.
+		ms.RegisterMockResponse("GetPerson", &demopb.Person{
+			Id:    "123",
+			Name:  "John Doe",
+			Email: "jdoe@example.com",
+			Type:  1,
+		})
+	}
 
 	// Listen and Serve
 	lis, err := net.Listen("tcp", *flagListen)

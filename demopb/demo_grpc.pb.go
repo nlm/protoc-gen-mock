@@ -23,9 +23,13 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApiClient interface {
+	// ListPersons lists the persons present in the database.
 	ListPersons(ctx context.Context, in *ListPersonsRequest, opts ...grpc.CallOption) (*ListPersonsResponse, error)
+	// GetPerson retrives one person from the database.
 	GetPerson(ctx context.Context, in *GetPersonRequest, opts ...grpc.CallOption) (*Person, error)
+	// CreatePerson creates a new person and stores it in the database.
 	CreatePerson(ctx context.Context, in *CreatePersonRequest, opts ...grpc.CallOption) (*Person, error)
+	// DeletePerson remove a person from the database
 	DeletePerson(ctx context.Context, in *DeletePersonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -77,9 +81,13 @@ func (c *apiClient) DeletePerson(ctx context.Context, in *DeletePersonRequest, o
 // All implementations must embed UnimplementedApiServer
 // for forward compatibility
 type ApiServer interface {
+	// ListPersons lists the persons present in the database.
 	ListPersons(context.Context, *ListPersonsRequest) (*ListPersonsResponse, error)
+	// GetPerson retrives one person from the database.
 	GetPerson(context.Context, *GetPersonRequest) (*Person, error)
+	// CreatePerson creates a new person and stores it in the database.
 	CreatePerson(context.Context, *CreatePersonRequest) (*Person, error)
+	// DeletePerson remove a person from the database
 	DeletePerson(context.Context, *DeletePersonRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedApiServer()
 }

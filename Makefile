@@ -29,10 +29,7 @@ test: $(TESTPB)/test.pb.go
 
 .PHONY: proto
 
-proto: $(DEMOPB)/annotations.pb.go $(DEMOPB)/demo.pb.go $(DEMOPB)/demo_grpc.pb.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo.mock.go
-
-$(DEMOPB)/annotations.pb.go: $(DEMOPB)/annotations.proto
-	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go_out=$(DEMOPB) --go_opt=paths=source_relative annotations.proto
+proto: $(DEMOPB)/demo.pb.go $(DEMOPB)/demo_grpc.pb.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo.mock.go
 
 $(DEMOPB)/demo.pb.go: $(DEMOPB)/demo.proto
 	protoc -I $(DEMOPB) $(PROTOINCLUDE) --go_out=$(DEMOPB) --go_opt=paths=source_relative demo.proto

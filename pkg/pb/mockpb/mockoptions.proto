@@ -10,6 +10,8 @@ import "google/protobuf/descriptor.proto";
 // and therefore, improve the generation.
 enum MockFieldType {
   mock_field_type_unknown = 0;
+  // technical
+
   ip                          = 1;
   ipv4                        = 2;
   ipv6                        = 3;
@@ -17,6 +19,106 @@ enum MockFieldType {
   uuid                        = 5;
   ipnet                       = 6;
   mac_address                 = 7;
+  url                         = 8;
+
+  useragent                   = 20;
+  domain                      = 21;
+  tld                         = 22;
+  email                       = 23;
+  file_extension              = 24;
+  mime_type                   = 25;
+  http_method                 = 26;
+  http_statuscode             = 27;
+  http_statuscode_simple      = 28;
+  hexcolor                    = 29;
+
+  // images
+  image                       = 40;
+  image_url                   = 41;
+  log_level                   = 42;
+
+  // administrative
+
+  // street_address will generate a random address street string
+  street_address              = 50;
+  // StreetName will generate a random address street name string
+  street_name                 = 51;
+  // StreetNumber will generate a random address street number string
+  street_number               = 52;
+  // StreetPrefix will generate a random address street prefix string
+  street_prefix               = 53;
+  // StreetSuffix will generate a random address street suffix string
+  street_suffix               = 54;
+  city                        = 55;
+  country                     = 56;
+  country_short               = 57;
+  creditcard_cvv              = 58;
+  creditcard_number           = 59;
+  creditcard_type             = 60;
+  currency                    = 61;
+  currency_short              = 62;
+  phone_number                = 63;
+
+  language                    = 64;
+  language_short              = 65;
+  language_bcp                = 66;
+  latitude                    = 67;
+  longitude                   = 68;
+  timezone                    = 69;
+  timezone_short              = 70;
+  timezone_offset             = 71;
+  // TimeZoneRegion will select a random region style timezone string, e.g. "America/Chicago"
+  timezone_region             = 72;
+
+  first_name                  = 73;
+  last_name                   = 74;
+  full_name                   = 75;
+  name_prefix                 = 76;
+  ssn                         = 77;
+  us_state                    = 78;
+
+  date                        = 80;
+  year                        = 81;
+  day                         = 82;
+  hour                        = 83;
+  minute                      = 84;
+  second                      = 85;
+  month                       = 86;
+  month_string                = 87;
+  nanosecond                  = 88;
+
+  // native types
+  number                      = 100;
+  float32                     = 101;
+  float64                     = 102;
+  hexuint8                    = 103;
+  hexuint16                   = 104;
+  hexuint32                   = 105;
+  hexuint64                   = 106;
+  hexuint128                  = 107;
+  hexuint256                  = 108;
+  int8                        = 109;
+  int16                       = 110;
+  int32                       = 111;
+  int64                       = 112;
+  uint8                       = 113;
+  uint16                      = 114;
+  uint32                      = 115;
+  uint64                      = 116;
+
+  // misc
+  author                      = 120;
+  app_name                    = 121;
+  version                     = 122;
+  color                       = 123;
+  company                     = 124;
+  emoji                       = 125;
+  emoji_alias                 = 126;
+  lorem_ipsum                 = 127;
+  password                    = 128;
+  phrase                      = 129;
+  price                       = 130;
+  job_title                   = 131;
 }
 
 // https://developers.google.com/protocol-buffers/docs/proto#customoptions

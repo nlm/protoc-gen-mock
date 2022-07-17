@@ -39,7 +39,7 @@ func randomScalarValueMocker(field protoreflect.FieldDescriptor) any {
 	case protoreflect.Sfixed64Kind:
 		return int64(Faker().Number(numberLowValue, numberMaxValue))
 	case protoreflect.BoolKind:
-		return [...]bool{false, true}[int(Faker().Int8()%2)]
+		return bool(Faker().Bool())
 	case protoreflect.StringKind:
 		return string(Faker().LoremIpsumSentence(loremIpsumWordCount))
 	case protoreflect.BytesKind:
