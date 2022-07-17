@@ -1,7 +1,7 @@
 syntax = "proto3";
 package mockpb;
 
-option go_package = ".;mockpb";
+option go_package = "github.com/nlm/protoc-gen-mock/pkg/pb/mockpb;mockpb";
 
 import "google/protobuf/descriptor.proto";
 

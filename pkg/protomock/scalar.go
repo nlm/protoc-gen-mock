@@ -9,7 +9,11 @@ type ScalarValueMocker func(protoreflect.FieldDescriptor) any
 var scalarValueMockers []ScalarValueMocker
 
 func init() {
-	registerScalarValueMocker(nameBasedScalarValueMocker, randomScalarValueMocker)
+	registerScalarValueMocker(
+		optionBasedScalarValueMocker,
+		nameBasedScalarValueMocker,
+		randomScalarValueMocker,
+	)
 }
 
 func registerScalarValueMocker(fm ...ScalarValueMocker) {

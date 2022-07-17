@@ -93,26 +93,4 @@ func mockMessage(msg proto.Message, depth int) {
 		field := fields.Get(i)
 		mockField(msg, field, depth+1)
 	}
-	// fmt.Println(field.FullName())
-	// 	if field.IsList() {
-	// 		lst := msg.ProtoReflect().Mutable(field).List()
-	// 		mockList(field, lst)
-	// 		continue
-	// 	}
-	// 	if field.IsMap() {
-	// 		mp := msg.ProtoReflect().Mutable(field).Map()
-	// 		mockMap(field, mp)
-	// 		continue
-	// 	}
-	// 	if field.Kind() != protoreflect.MessageKind {
-	// 		msg.ProtoReflect().Set(field, mockField(field))
-	// 		continue
-	// 	}
-	// 	// protect from infinite recursion
-	// 	if depth >= mockMaxDepth {
-	// 		continue
-	// 	}
-	// 	sm := newMessage(field.Message())
-	// 	mockMessage(sm, depth+1)
-	// 	msg.ProtoReflect().Set(field, protoreflect.ValueOf(sm.ProtoReflect()))
 }

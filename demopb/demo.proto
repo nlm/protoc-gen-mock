@@ -8,6 +8,7 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "annotations.proto";
+import "mockpb/mockoptions.proto";
 
 service Api {
 
@@ -48,6 +49,7 @@ message Person {
   string email = 3;
   Type type = 4;
   map<string, string> attributes = 5;
+  string hardware = 6 [(mockpb.type) = mac_address];
 }
 
 message ListPersonsRequest {

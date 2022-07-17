@@ -2,14 +2,15 @@ PROG=protoc-gen-mock
 DEMOPB=demopb
 TESTPB=pkg/pb/testpb
 SCENARIOPB=pkg/pb/scenariopb
-PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto
+MOCKPB=pkg/pb/mockpb
+PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto -I ./pkg/pb
 LDFLAGS=-ldflags="-s -w"
 
 .PHONY: build
 
 build: $(PROG)
 
-$(PROG): ./cmd/$(PROG)/*.go ./pkg/*/*.go $(SCENARIOPB)/scenario.pb.go
+$(PROG): ./cmd/$(PROG)/*.go ./pkg/*/*.go $(SCENARIOPB)/scenario.pb.go $(MOCKPB)/mockoptions.pb.go
 	go build $(LDFLAGS) ./cmd/$(PROG)/
 
 $(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
@@ -17,6 +18,9 @@ $(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
 
 $(TESTPB)/test.pb.go: $(TESTPB)/test.proto
 	protoc -I $(TESTPB) $(PROTOINCLUDE) --go_out=$(TESTPB) --go_opt=paths=source_relative test.proto
+
+$(MOCKPB)/mockoptions.pb.go: $(MOCKPB)/mockoptions.proto
+	protoc -I $(MOCKPB) $(PROTOINCLUDE) --go_out=$(MOCKPB) --go_opt=paths=source_relative mockoptions.proto
 
 .PHONY: test
 
@@ -65,3 +69,4 @@ clean:
 protoclean:
 	rm -f $(DEMOPB)/demo.pb.go $(DEMOPB)/demo.mock.go $(DEMOPB)/demo.pb.gw.go $(DEMOPB)/demo_grpc.pb.go
 	rm -f $(SCENARIOPB)/scenario.pb.go
+	rm -f $(MOCKPB)/annotations.pb.go
