@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// StandardFieldType represents a Scaleway standard type.
+// StandardFieldType represents a standard type.
 // These types are useful to provide context to protobuf generators
 // and therefore, improve the generation.
 type StandardFieldType int32

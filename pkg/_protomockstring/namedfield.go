@@ -1,4 +1,4 @@
-package protomock
+package protomockstring
 
 import (
 	"strings"
@@ -8,9 +8,11 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+var sepRemover = strings.NewReplacer("-", "", "_", "", ".", "")
+
 func nameBasedFieldValueMocker(field *protogen.Field) string {
-	switch strings.ToLower(string(field.Desc.Name())) {
-	case "id":
+	switch strings.ToLower(sepRemover.Replace(string(field.Desc.Name()))) {
+	case "id", "uid", "uuid":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.UUID())
@@ -26,37 +28,40 @@ func nameBasedFieldValueMocker(field *protogen.Field) string {
 			protoreflect.Uint64Kind:
 			return S(fake.Number(1000000, 9999999))
 		}
-	case "first_name", "firstname", "first-name":
+	case "firstname":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.FirstName())
 		}
-	case "last_name", "lastname", "last-name":
+	case "lastname":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.LastName())
 		}
-	case "name":
+	case "name", "fullname":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.Name())
 		}
-	case "email", "mail", "e-mail":
+	case "mail", "email":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.Email())
 		}
-	case "address":
+	case "address", "streetaddress":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.Address())
 		}
-	case "mac",
-		"macaddress", "mac-address", "mac_address",
-		"macaddr", "mac-addr", "mac_addr":
+	case "mac", "macaddress", "macaddr":
 		switch field.Desc.Kind() {
 		case protoreflect.StringKind:
 			return Q(fake.MacAddress())
+		}
+	case "description":
+		switch field.Desc.Kind() {
+		case protoreflect.StringKind:
+			return Q(fake.LoremIpsumSentence(5))
 		}
 	}
 	return ""

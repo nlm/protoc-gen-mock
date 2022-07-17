@@ -1,29 +1,26 @@
 package protomock
 
 import (
-	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func defaultFieldValueMocker(field *protogen.Field) string {
-	return KindDefaultValue(field.Desc.Kind())
+type FieldMocker func(protoreflect.FieldDescriptor) any
+
+var fieldMockers []FieldMocker
+
+func init() {
+	registerFieldMocker(nameBasedFieldMocker, randomFieldMocker)
 }
 
-type FieldValueMocker func(*protogen.Field) string
-
-var fieldValueMockers []FieldValueMocker
-
-func RegisterFieldValueMocker(fvm FieldValueMocker) {
-	fieldValueMockers = append(fieldValueMockers, fvm)
+func registerFieldMocker(fm ...FieldMocker) {
+	fieldMockers = append(fieldMockers, fm...)
 }
 
-func MockFieldValue(field *protogen.Field) string {
-	for _, fvm := range fieldValueMockers {
-		if value := fvm(field); value != "" {
-			return value
+func mockField(field protoreflect.FieldDescriptor) protoreflect.Value {
+	for _, fm := range fieldMockers {
+		if v := fm(field); v != nil {
+			return protoreflect.ValueOf(v)
 		}
 	}
-	if value := nameBasedFieldValueMocker(field); value != "" {
-		return value
-	}
-	return kindDefaultValueMocker(field)
+	return field.Default()
 }

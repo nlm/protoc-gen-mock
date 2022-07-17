@@ -1,5 +1,6 @@
 PROG=protoc-gen-mock
 DEMOPB=demopb
+TESTPB=pkg/pb/testpb
 SCENARIOPB=pkg/pb/scenariopb
 PROTOINCLUDE=-I ./protobuf/google -I ./protobuf/grpc/src/proto
 LDFLAGS=-ldflags="-s -w"
@@ -13,6 +14,14 @@ $(PROG): ./cmd/$(PROG)/*.go ./pkg/*/*.go $(SCENARIOPB)/scenario.pb.go
 
 $(SCENARIOPB)/scenario.pb.go: $(SCENARIOPB)/scenario.proto
 	protoc -I $(SCENARIOPB) $(PROTOINCLUDE) --go_out=$(SCENARIOPB) --go_opt=paths=source_relative scenario.proto
+
+$(TESTPB)/test.pb.go: $(TESTPB)/test.proto
+	protoc -I $(TESTPB) $(PROTOINCLUDE) --go_out=$(TESTPB) --go_opt=paths=source_relative test.proto
+
+.PHONY: test
+
+test: $(TESTPB)/test.pb.go
+	go test ./cmd/... ./pkg/...
 
 .PHONY: proto
 

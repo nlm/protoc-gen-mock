@@ -10,6 +10,7 @@ import (
 	"github.com/nlm/protoc-gen-mock/demopb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var (
@@ -20,7 +21,16 @@ var (
 func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				UseProtoNames: true,
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			},
+		}),
+	)
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	err := demopb.RegisterApiHandlerFromEndpoint(ctx, mux, *flagEndpoint, opts)
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 	protojson "google.golang.org/protobuf/encoding/protojson"
 	status "google.golang.org/genproto/googleapis/rpc/status"
 	spb "google.golang.org/grpc/status"
+	protomock "github.com/nlm/protoc-gen-mock/pkg/protomock"
 )
 
 var (
@@ -41,6 +42,12 @@ type MockApiServer struct {
 		GetPerson    func(*MockApiServer)
 		CreatePerson func(*MockApiServer)
 		DeletePerson func(*MockApiServer)
+	}
+	defaults struct {
+		ListPersons  *ListPersonsResponse
+		GetPerson    *Person
+		CreatePerson *Person
+		DeletePerson *emptypb.Empty
 	}
 }
 
@@ -183,10 +190,7 @@ func (ms *MockApiServer) ListPersons(ctx context.Context, req *ListPersonsReques
 	if ms.contents.ListPersons != nil {
 		return ms.contents.ListPersons, nil
 	}
-	return &ListPersonsResponse{
-		Persons:    nil,
-		TotalCount: 0,
-	}, nil
+	return ms.defaults.ListPersons, nil
 }
 
 func (ms *MockApiServer) GetPerson(ctx context.Context, req *GetPersonRequest) (*Person, error) {
@@ -199,12 +203,7 @@ func (ms *MockApiServer) GetPerson(ctx context.Context, req *GetPersonRequest) (
 	if ms.contents.GetPerson != nil {
 		return ms.contents.GetPerson, nil
 	}
-	return &Person{
-		Id:    "538c7f96-b164-4f1b-97bb-9f4bb472e89f",
-		Name:  "Dustin Jones",
-		Email: "stuartpacocha@hartmann.net",
-		Type:  0,
-	}, nil
+	return ms.defaults.GetPerson, nil
 }
 
 func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequest) (*Person, error) {
@@ -217,12 +216,7 @@ func (ms *MockApiServer) CreatePerson(ctx context.Context, req *CreatePersonRequ
 	if ms.contents.CreatePerson != nil {
 		return ms.contents.CreatePerson, nil
 	}
-	return &Person{
-		Id:    "5b1484f2-5258-483f-a1d3-75bc02b41df4",
-		Name:  "Jaylon Johns",
-		Email: "kristaryan@kassulke.name",
-		Type:  0,
-	}, nil
+	return ms.defaults.CreatePerson, nil
 }
 
 func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequest) (*emptypb.Empty, error) {
@@ -235,11 +229,24 @@ func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequ
 	if ms.contents.DeletePerson != nil {
 		return ms.contents.DeletePerson, nil
 	}
-	return &emptypb.Empty{}, nil
+	return ms.defaults.DeletePerson, nil
+}
+
+func (ms *MockApiServer) initDefaults() {
+	protomock.Seed(6904809466881647088)
+	ms.defaults.ListPersons = new(ListPersonsResponse)
+	protomock.Mock(ms.defaults.ListPersons)
+	ms.defaults.GetPerson = new(Person)
+	protomock.Mock(ms.defaults.GetPerson)
+	ms.defaults.CreatePerson = new(Person)
+	protomock.Mock(ms.defaults.CreatePerson)
+	ms.defaults.DeletePerson = new(emptypb.Empty)
+	protomock.Mock(ms.defaults.DeletePerson)
 }
 
 func RegisterMockApiServer(s grpc.ServiceRegistrar) *MockApiServer {
 	ms := &MockApiServer{}
+	ms.initDefaults()
 	RegisterApiServer(s, ms)
 	return ms
 }

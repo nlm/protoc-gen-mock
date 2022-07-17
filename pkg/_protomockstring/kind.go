@@ -1,4 +1,4 @@
-package protomock
+package protomockstring
 
 import (
 	fake "github.com/brianvoe/gofakeit/v6"
@@ -13,7 +13,7 @@ func KindDefaultValue(kind protoreflect.Kind) string {
 	case protoreflect.StringKind:
 		return Q(fake.LoremIpsumSentence(5))
 	case protoreflect.BytesKind:
-		return S("[]byte(\"" + fake.LoremIpsumSentence(5) + "\")")
+		return S("[]byte(" + Q(fake.LoremIpsumSentence(5)) + ")")
 	case protoreflect.EnumKind:
 		return S(0)
 	case protoreflect.DoubleKind,

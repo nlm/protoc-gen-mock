@@ -45,16 +45,16 @@ func main() {
 
 	// Direct Registration (JSON).
 	// Used by the Scenario facility to register content and status.
-	ms.RegisterJSONMockContent("GetPerson", []byte(`{"id": "42", "name": "Bob"}`))
+	// ms.RegisterJSONMockContent("GetPerson", []byte(`{"id": "42", "name": "Bob"}`))
 
 	// Direct Registration (Native).
 	// Convenience wrapper giving the ability go register objects, status and errors.
-	ms.RegisterMockResponse("GetPerson", &demopb.Person{
-		Id:    "123",
-		Name:  "John Doe",
-		Email: "jdoe@example.com",
-		Type:  1,
-	})
+	// ms.RegisterMockResponse("GetPerson", &demopb.Person{
+	// 	Id:    "123",
+	// 	Name:  "John Doe",
+	// 	Email: "jdoe@example.com",
+	// 	Type:  1,
+	// })
 
 	// Listen and Serve
 	lis, err := net.Listen("tcp", *flagListen)

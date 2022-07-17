@@ -1,10 +1,10 @@
 package main
 
 import (
+	"hash/fnv"
 	"io/ioutil"
 	"log"
 
-	"github.com/nlm/protoc-gen-mock/pkg/protomock"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -21,6 +21,7 @@ var generatedImports = []ImportDecl{
 	{"protojson", "google.golang.org/protobuf/encoding/protojson"},
 	{"status", "google.golang.org/genproto/googleapis/rpc/status"},
 	{"spb", "google.golang.org/grpc/status"},
+	{"protomock", "github.com/nlm/protoc-gen-mock/pkg/protomock"},
 }
 
 func genHeader(file *protogen.File, genFile *protogen.GeneratedFile) error {
@@ -49,6 +50,12 @@ func genErrors(file *protogen.File, genFile *protogen.GeneratedFile) error {
 	return nil
 }
 
+func genSeed(name string) int64 {
+	hasher := fnv.New64()
+	hasher.Write([]byte(name))
+	return int64(hasher.Sum64())
+}
+
 func Generate(gen *protogen.Plugin) error {
 	log.Print("----- BEGIN PLUGIN -----")
 	for _, file := range gen.Files {
@@ -68,13 +75,14 @@ func Generate(gen *protogen.Plugin) error {
 			if err := f(file, genFile); err != nil {
 				return err
 			}
-			genFile.P("")
+			genFile.P()
 		}
 
 		// Services
 		for _, s := range file.Services {
-			baseServerName := s.GoName + "Server"
-			mockServerName := "Mock" + baseServerName
+			sn := ServerNamer{s.GoName}
+			baseServerName := sn.BaseServerName()
+			mockServerName := sn.MockServerName()
 
 			// type MockXServer
 			genFile.P("type ", mockServerName, " struct {")
@@ -95,6 +103,12 @@ func Generate(gen *protogen.Plugin) error {
 			genFile.P("callbacks struct {")
 			for _, m := range s.Methods {
 				genFile.P(m.GoName, " func(*", mockServerName, ")")
+			}
+			genFile.P("}")
+			// defaults
+			genFile.P("defaults struct {")
+			for _, m := range s.Methods {
+				genFile.P(m.GoName, " *", genFile.QualifiedGoIdent(m.Output.GoIdent))
 			}
 			genFile.P("}")
 			genFile.P("}")
@@ -195,18 +209,30 @@ func Generate(gen *protogen.Plugin) error {
 				genFile.P("}")
 
 				// return defaut value
-				genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
-				for _, f := range m.Output.Fields {
-					genFile.P(f.GoName, ": ", protomock.MockFieldValue(f), ",")
-				}
-				genFile.P("}, nil")
+				// genFile.P("return &", genFile.QualifiedGoIdent(m.Output.GoIdent), "{")
+				// for _, f := range m.Output.Fields {
+				// 	genFile.P(f.GoName, ": ", protomockstring.MockFieldValue(f), ",")
+				// }
+				// genFile.P("}, nil")
+				genFile.P("return ms.defaults.", m.GoName, ", nil")
+				// genFile.P("return ", mockServerDefaultsName, ".", m.GoName, ", nil")
 				genFile.P("}")
 				genFile.P("")
 			}
+			// func Init()
+			genFile.P("func (ms *", mockServerName, ") initDefaults() {")
+			genFile.P("protomock.Seed(", genSeed(mockServerName), ")")
+			for _, m := range s.Methods {
+				genFile.P("ms.defaults.", m.GoName, " = new(", genFile.QualifiedGoIdent(m.Output.GoIdent), ")")
+				genFile.P("protomock.Mock(ms.defaults.", m.GoName, ")")
+			}
+			genFile.P("}")
+			genFile.P("")
 
 			// func RegisterXServer()
 			genFile.P("func Register", mockServerName, "(s grpc.ServiceRegistrar) (*", mockServerName, ") {")
 			genFile.P("ms := &", mockServerName, "{}")
+			genFile.P("ms.initDefaults()")
 			genFile.P("Register", baseServerName, "(s, ms)")
 			genFile.P("return ms")
 			genFile.P("}")

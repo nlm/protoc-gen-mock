@@ -1,6 +1,8 @@
-package protomock
+package protomockstring
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Q quotas the passed string
 func Q(obj any) string {

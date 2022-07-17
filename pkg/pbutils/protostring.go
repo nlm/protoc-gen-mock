@@ -6,7 +6,11 @@ import (
 )
 
 func ProtoString(m proto.Message) string {
-	bytes, err := protojson.Marshal(m)
+	bytes, err := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		UseEnumNumbers:  true,
+		EmitUnpopulated: true,
+	}.Marshal(m)
 	if err != nil {
 		return ""
 	}

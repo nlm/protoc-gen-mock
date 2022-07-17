@@ -5,7 +5,7 @@ option go_package = ".;demopb";
 
 import "google/protobuf/descriptor.proto";
 
-// StandardFieldType represents a Scaleway standard type.
+// StandardFieldType represents a standard type.
 // These types are useful to provide context to protobuf generators
 // and therefore, improve the generation.
 enum StandardFieldType {
