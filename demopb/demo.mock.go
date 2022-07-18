@@ -252,7 +252,7 @@ func (ms *MockApiServer) DeletePerson(ctx context.Context, req *DeletePersonRequ
 }
 
 func (ms *MockApiServer) initDefaults() {
-	protomock.Seed(6904809466881647088)
+	protomock.Seed(9086669613755143948)
 	ms.defaults.ListPersons = new(ListPersonsResponse)
 	protomock.Mock(ms.defaults.ListPersons)
 	ms.defaults.GetPerson = new(Person)

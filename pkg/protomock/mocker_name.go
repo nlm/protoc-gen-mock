@@ -1,6 +1,7 @@
 package protomock
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/nlm/protoc-gen-mock/pkg/pbutils"
@@ -13,7 +14,7 @@ func normalizeFieldName(name protoreflect.Name) string {
 	return strings.ToLower(sepRemover.Replace(string(name)))
 }
 
-func convertNumeral[T float32 | float64 | int | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T, kind protoreflect.Kind) any {
+func convertNumeral[T float32 | float64 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T, kind protoreflect.Kind) any {
 	switch kind {
 	case protoreflect.DoubleKind:
 		return float64(value)
@@ -27,9 +28,13 @@ func convertNumeral[T float32 | float64 | int | int32 | int64 | uint | uint8 | u
 		return uint32(value)
 	case protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
 		return uint64(value)
+	case protoreflect.StringKind:
+		return fmt.Sprint(value)
 	}
 	panic("invalid conversion")
 }
+
+// func nameBasedMapEntryMocker(field)
 
 func nameBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 	// TODO: handle field.Name == "key" && field.ContainingMessage().IsMapEntry()

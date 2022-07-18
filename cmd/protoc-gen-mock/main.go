@@ -50,7 +50,7 @@ func genErrors(file *protogen.File, genFile *protogen.GeneratedFile) error {
 	return nil
 }
 
-func genSeed(name string) int64 {
+func makeSeed(name string) int64 {
 	hasher := fnv.New64()
 	hasher.Write([]byte(name))
 	return int64(hasher.Sum64())
@@ -230,7 +230,7 @@ func Generate(gen *protogen.Plugin) error {
 			}
 			// func Init()
 			genFile.P("func (ms *", mockServerName, ") initDefaults() {")
-			genFile.P("protomock.Seed(", genSeed(mockServerName), ")")
+			genFile.P("protomock.Seed(", makeSeed(string(s.Desc.FullName())), ")")
 			for _, m := range s.Methods {
 				genFile.P("ms.defaults.", m.GoName, " = new(", genFile.QualifiedGoIdent(m.Output.GoIdent), ")")
 				genFile.P("protomock.Mock(ms.defaults.", m.GoName, ")")

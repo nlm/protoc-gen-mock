@@ -41,13 +41,13 @@ enum MockFieldType {
 
   // street_address will generate a random address street string
   street_address              = 50;
-  // StreetName will generate a random address street name string
+  // streen_name will generate a random address street name string
   street_name                 = 51;
-  // StreetNumber will generate a random address street number string
+  // street_number will generate a random address street number string
   street_number               = 52;
-  // StreetPrefix will generate a random address street prefix string
+  // street_prefix will generate a random address street prefix string
   street_prefix               = 53;
-  // StreetSuffix will generate a random address street suffix string
+  // street_suffix will generate a random address street suffix string
   street_suffix               = 54;
   city                        = 55;
   country                     = 56;
@@ -74,8 +74,9 @@ enum MockFieldType {
   last_name                   = 74;
   full_name                   = 75;
   name_prefix                 = 76;
-  ssn                         = 77;
+  us_ssn                      = 77;
   us_state                    = 78;
+  us_state_short              = 79;
 
   date                        = 80;
   year                        = 81;
@@ -86,25 +87,28 @@ enum MockFieldType {
   month                       = 86;
   month_string                = 87;
   nanosecond                  = 88;
+  date_future                 = 89;
+  date_past                   = 90;
+  date_now                    = 91;
 
   // native types
   number                      = 100;
-  float32                     = 101;
-  float64                     = 102;
-  hexuint8                    = 103;
-  hexuint16                   = 104;
-  hexuint32                   = 105;
-  hexuint64                   = 106;
-  hexuint128                  = 107;
-  hexuint256                  = 108;
-  int8                        = 109;
-  int16                       = 110;
-  int32                       = 111;
-  int64                       = 112;
-  uint8                       = 113;
-  uint16                      = 114;
-  uint32                      = 115;
-  uint64                      = 116;
+  // float32                     = 101;
+  // float64                     = 102;
+  // hexuint8                    = 103;
+  // hexuint16                   = 104;
+  // hexuint32                   = 105;
+  // hexuint64                   = 106;
+  // hexuint128                  = 107;
+  // hexuint256                  = 108;
+  // int8                        = 109;
+  // int16                       = 110;
+  // int32                       = 111;
+  // int64                       = 112;
+  // uint8                       = 113;
+  // uint16                      = 114;
+  // uint32                      = 115;
+  // uint64                      = 116;
 
   // misc
   author                      = 120;
@@ -121,9 +125,30 @@ enum MockFieldType {
   job_title                   = 131;
 }
 
+message ConstFieldType {
+  oneof value {
+    string string = 1;
+    int32  int    = 2;
+    uint32 uint32 = 3;
+  }
+}
+
+message MapFieldType {
+  MockFieldType randomkey = 1;
+  MockFieldType randomvalue = 2;
+  ConstFieldType constkey = 3;
+  ConstFieldType constvalue = 4;
+}
+
 // https://developers.google.com/protocol-buffers/docs/proto#customoptions
 extend google.protobuf.FieldOptions {
   // Type specify the standard type of a field.
   // On a map field, this annotation will target only the value type.
-  MockFieldType type = 90210;
+  MockFieldType  random          = 90210;
+  ConstFieldType const        = 90211;
+  MapFieldType map = 90212;
+  // MockFieldType mapkeytype    = 90211;
+  // MockFieldType mapvaluetype  = 90212;
+  // string        template      = 90211;
+  uint32 repeat = 90213;
 }

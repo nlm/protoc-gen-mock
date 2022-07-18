@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	flagListen   = flag.String("listen", ":8080", "listen address")
-	flagEndpoint = flag.String("endpoint", "localhost:9090", "grpc server endpoint")
+	flagListen          = flag.String("listen", ":8080", "listen address")
+	flagEndpoint        = flag.String("endpoint", "localhost:9090", "grpc server endpoint")
+	flagEmitUnpopulated = flag.Bool("emit-unpopulated", false, "emit unpopulated fields")
 )
 
 func run() error {
@@ -24,7 +25,8 @@ func run() error {
 	mux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
-				UseProtoNames: true,
+				UseProtoNames:   true,
+				EmitUnpopulated: *flagEmitUnpopulated,
 			},
 			UnmarshalOptions: protojson.UnmarshalOptions{
 				DiscardUnknown: true,

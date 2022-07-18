@@ -1,6 +1,9 @@
 package protomock
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/nlm/protoc-gen-mock/pkg/pb/mockpb"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -8,7 +11,7 @@ import (
 
 func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 	// TODO: handle field.Name == "key" && field.ContainingMessage().IsMapEntry()
-	switch proto.GetExtension(field.Options(), mockpb.E_Type).(mockpb.MockFieldType) {
+	switch proto.GetExtension(field.Options(), mockpb.E_Random).(mockpb.MockFieldType) {
 	case mockpb.MockFieldType_ip, mockpb.MockFieldType_ipv4:
 		switch field.Kind() {
 		case protoreflect.StringKind:
@@ -20,6 +23,7 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 			return Faker().IPv6Address()
 		}
 	case mockpb.MockFieldType_size:
+		// FIXME
 		return nil
 	case mockpb.MockFieldType_uuid:
 		switch field.Kind() {
@@ -154,8 +158,7 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 	case mockpb.MockFieldType_creditcard_number:
 		switch field.Kind() {
 		case protoreflect.StringKind:
-			// return Faker().CreditCardNumber()
-			return nil
+			return Faker().CreditCardNumber(nil)
 		}
 	case mockpb.MockFieldType_creditcard_type:
 		switch field.Kind() {
@@ -171,6 +174,287 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 		switch field.Kind() {
 		case protoreflect.StringKind:
 			return Faker().CurrencyShort()
+		}
+	case mockpb.MockFieldType_phone_number:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Phone()
+		}
+	case mockpb.MockFieldType_language:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Language()
+		}
+	case mockpb.MockFieldType_language_short:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().LanguageAbbreviation()
+		}
+	case mockpb.MockFieldType_language_bcp:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().LanguageBCP()
+		}
+	case mockpb.MockFieldType_latitude:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return fmt.Sprint(Faker().Latitude())
+		case protoreflect.FloatKind, protoreflect.DoubleKind:
+			return convertNumeral(Faker().Latitude(), field.Kind())
+		}
+	case mockpb.MockFieldType_longitude:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Longitude()
+		case protoreflect.FloatKind, protoreflect.DoubleKind:
+			return convertNumeral(Faker().Longitude(), field.Kind())
+		}
+	case mockpb.MockFieldType_timezone:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().TimeZone()
+		}
+	case mockpb.MockFieldType_timezone_short:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().TimeZoneAbv()
+		}
+	case mockpb.MockFieldType_timezone_offset:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return fmt.Sprint(Faker().TimeZoneOffset())
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(Faker().TimeZoneOffset(), field.Kind())
+		}
+	case mockpb.MockFieldType_timezone_region:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().TimeZoneRegion()
+		}
+	case mockpb.MockFieldType_first_name:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().FirstName()
+		}
+	case mockpb.MockFieldType_last_name:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().LastName()
+		}
+	case mockpb.MockFieldType_full_name:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Name()
+		}
+	case mockpb.MockFieldType_name_prefix:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().NamePrefix()
+		}
+	case mockpb.MockFieldType_us_ssn:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().SSN()
+		}
+	case mockpb.MockFieldType_us_state:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().State()
+		}
+	case mockpb.MockFieldType_us_state_short:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().StateAbr()
+		}
+	case mockpb.MockFieldType_date:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(Faker().Date().Unix(), field.Kind())
+		}
+	case mockpb.MockFieldType_year:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Year(), field.Kind())
+		}
+	case mockpb.MockFieldType_hour:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Minute(), field.Kind())
+			return convertNumeral(Faker().Hour(), field.Kind())
+		}
+	case mockpb.MockFieldType_minute:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Minute(), field.Kind())
+		}
+	case mockpb.MockFieldType_second:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Second(), field.Kind())
+		}
+	case mockpb.MockFieldType_month:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Month(), field.Kind())
+		}
+	case mockpb.MockFieldType_month_string:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().MonthString()
+		}
+	case mockpb.MockFieldType_nanosecond:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().NanoSecond(), field.Kind())
+		}
+	case mockpb.MockFieldType_date_future:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return fmt.Sprint(Faker().DateRange(time.Now(), time.Now().Add(365*24*time.Hour)), field.Kind())
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(Faker().DateRange(time.Now(), time.Now().Add(365*24*time.Hour)).Unix(), field.Kind())
+		}
+	case mockpb.MockFieldType_date_past:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return fmt.Sprint(Faker().DateRange(time.Now().Add(-365*24*time.Hour), time.Now()), field.Kind())
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(Faker().DateRange(time.Now().Add(-365*24*time.Hour), time.Now()).Unix(), field.Kind())
+		}
+	case mockpb.MockFieldType_date_now:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return fmt.Sprint(time.Now())
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(time.Now().Unix(), field.Kind())
+		}
+	case mockpb.MockFieldType_number:
+		switch field.Kind() {
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
+			protoreflect.StringKind:
+			return convertNumeral(Faker().Number(numberLowValue, numberMaxValue), field.Kind())
+		}
+	case mockpb.MockFieldType_author:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().AppAuthor()
+		}
+	case mockpb.MockFieldType_app_name:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().AppName()
+		}
+	case mockpb.MockFieldType_version:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().AppName()
+
+		}
+	case mockpb.MockFieldType_color:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Color()
+		}
+	case mockpb.MockFieldType_emoji:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Emoji()
+		}
+	case mockpb.MockFieldType_emoji_alias:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().EmojiAlias()
+		}
+	case mockpb.MockFieldType_lorem_ipsum:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().LoremIpsumSentence(loremIpsumWordCount)
+		}
+	case mockpb.MockFieldType_password:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Password(true, true, true, true, false, 16)
+		}
+	case mockpb.MockFieldType_phrase:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Phrase()
+		}
+	case mockpb.MockFieldType_price:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().Price(100, 200)
+		}
+	case mockpb.MockFieldType_job_title:
+		switch field.Kind() {
+		case protoreflect.StringKind:
+			return Faker().JobTitle()
 		}
 	}
 	return nil

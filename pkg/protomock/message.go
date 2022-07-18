@@ -1,6 +1,7 @@
 package protomock
 
 import (
+	"github.com/nlm/protoc-gen-mock/pkg/pb/mockpb"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
@@ -8,6 +9,14 @@ import (
 
 const mockMaxDepth = 100
 const mockRepeatedCount = 3
+
+func getRepetitions(field protoreflect.FieldDescriptor) int {
+	v := proto.GetExtension(field.Options(), mockpb.E_Items).(uint32)
+	if v > 0 {
+		return int(v)
+	}
+	return mockRepeatedCount
+}
 
 func newMessage(desc protoreflect.MessageDescriptor) protoreflect.ProtoMessage {
 	mt, err := protoregistry.GlobalTypes.FindMessageByName(desc.FullName())
@@ -19,25 +28,28 @@ func newMessage(desc protoreflect.MessageDescriptor) protoreflect.ProtoMessage {
 	return mt.New().Interface()
 }
 
+// mockList mocks a list field
 func mockList(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 	lst := msg.ProtoReflect().Mutable(field).List()
+	// check tags for repetition
 	switch field.Kind() {
 	// FIXME: other kinds
 	case protoreflect.MessageKind:
-		for i := 0; i < mockRepeatedCount; i++ {
+		for i := 0; i < getRepetitions(field); i++ {
 			sm := lst.AppendMutable()
 			mockMessage(sm.Message().Interface(), 0)
 		}
 	default:
-		for i := 0; i < mockRepeatedCount; i++ {
+		for i := 0; i < getRepetitions(field); i++ {
 			lst.Append(mockScalar(field))
 		}
 	}
 }
 
+// mockMap mocks a map field
 func mockMap(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 	mp := msg.ProtoReflect().Mutable(field).Map()
-	for i := 0; i < mockRepeatedCount; i++ {
+	for i := 0; i < getRepetitions(field); i++ {
 		// Key
 		var mapKey protoreflect.MapKey
 		switch field.MapKey().Kind() {
@@ -62,6 +74,7 @@ func mockMap(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 	}
 }
 
+// mockUnary mocks an unary message type
 func mockUnary(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 	switch field.Kind() {
 	case protoreflect.MessageKind:
@@ -73,6 +86,7 @@ func mockUnary(msg proto.Message, field protoreflect.FieldDescriptor, depth int)
 	}
 }
 
+// mockField mocks a field
 func mockField(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 	switch {
 	case field.IsList():
@@ -84,6 +98,7 @@ func mockField(msg proto.Message, field protoreflect.FieldDescriptor, depth int)
 	}
 }
 
+// mockMessage mocks a Message field
 func mockMessage(msg proto.Message, depth int) {
 	if depth >= mockMaxDepth {
 		return

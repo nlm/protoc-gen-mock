@@ -49,17 +49,17 @@ message Person {
     individual = 0;
     company = 1;
   }
-  string id    = 1 [(mockpb.type) = uuid];
+  string id    = 1 [(mockpb.random) = uuid];
   string name  = 2;
   string email = 3;
   Type type = 4;
   map<string, string> attributes = 5;
-  string hardware = 6 [(mockpb.type) = mac_address];
+  string hardware = 6 [(mockpb.random) = mac_address];
 }
 
 // ListPersonRequests is the request to list the content of the database
 message ListPersonsRequest {
-  google.protobuf.StringValue project_id = 1 [(mockpb.type) = uuid];
+  google.protobuf.StringValue project_id = 1;
 
   // page is an optional field to get a particular page in listings
   google.protobuf.Int32Value page      = 10;
@@ -69,9 +69,9 @@ message ListPersonsRequest {
 
 // ListPersonsReponse is the result sent back from the listing
 message ListPersonsResponse {
-  repeated Person persons = 1;
+  repeated Person persons = 1 [(mockpb.repeat) = 5];
 
-  uint32 total_count = 10;
+  uint32 total_count = 10 [(mockpb.const) = {uint32: 5}];
 }
 
 message GetPersonRequest { 
@@ -79,7 +79,7 @@ message GetPersonRequest {
 }
 
 message CreatePersonRequest {
-  google.protobuf.StringValue project_id = 1;
+  google.protobuf.StringValue project_id = 1 [(mockpb.random) = uuid];
   Person person = 2;
 }
 
