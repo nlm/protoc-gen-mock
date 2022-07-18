@@ -11,7 +11,7 @@ const mockMaxDepth = 100
 const mockRepeatedCount = 3
 
 func getRepetitions(field protoreflect.FieldDescriptor) int {
-	v := proto.GetExtension(field.Options(), mockpb.E_Items).(uint32)
+	v := proto.GetExtension(field.Options(), mockpb.E_Repeat).(uint32)
 	if v > 0 {
 		return int(v)
 	}
