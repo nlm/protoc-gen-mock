@@ -37,7 +37,7 @@ func TestRandomScalarValueMocker(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			field := fields.ByName(protoreflect.Name(testCase.Name))
 			assert.NotNil(t, field)
-			v := randomScalarValueMocker(field)
+			v := randomScalarValueMocker(field, field.Options())
 			assert.NotNil(t, v)
 			switch zeroValue := testCase.Value.(type) {
 			case float32:

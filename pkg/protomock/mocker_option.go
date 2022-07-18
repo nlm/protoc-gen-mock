@@ -9,9 +9,66 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
-	// TODO: handle field.Name == "key" && field.ContainingMessage().IsMapEntry()
-	switch proto.GetExtension(field.Options(), mockpb.E_Random).(mockpb.MockFieldType) {
+func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor, fieldOptions proto.Message) any {
+	var (
+		c *mockpb.ConstFieldType
+		r mockpb.MockFieldType
+		t string
+	)
+	// Handle MapEntry
+	if field.ContainingMessage().IsMapEntry() {
+		m := proto.GetExtension(fieldOptions, mockpb.E_Map).(*mockpb.MapFieldType)
+		switch field.Name() {
+		case "key":
+			c = m.GetConstkey()
+			r = m.GetRandkey()
+			t = m.GetTemplatekey()
+		case "value":
+			c = m.GetConstvalue()
+			r = m.GetRandvalue()
+			t = m.GetTemplatevalue()
+		}
+	} else {
+		c = proto.GetExtension(fieldOptions, mockpb.E_Const).(*mockpb.ConstFieldType)
+		r = proto.GetExtension(fieldOptions, mockpb.E_Random).(mockpb.MockFieldType)
+		t = proto.GetExtension(fieldOptions, mockpb.E_Template).(string)
+	}
+	// Const
+	if v := getConstValueFromOption(field, c); v != nil {
+		return v
+	}
+	// Random
+	if v := getMockValueFromOption(field, r); v != nil {
+		return v
+	}
+	// Template
+	if v := getTemplateValueFromOption(field, t); v != nil {
+		return v
+	}
+	return nil
+}
+
+func getTemplateValueFromOption(field protoreflect.FieldDescriptor, template string) any {
+	if field.Kind() == protoreflect.StringKind && template != "" {
+		return Faker().Generate(template)
+	}
+	return nil
+}
+
+func getConstValueFromOption(field protoreflect.FieldDescriptor, constField *mockpb.ConstFieldType) any {
+	switch v := constField.GetValue().(type) {
+	case *mockpb.ConstFieldType_Number:
+		return convertNumeral(v.Number, field.Kind())
+	case *mockpb.ConstFieldType_String_:
+		return v.String_
+	case *mockpb.ConstFieldType_Bool:
+		return v.Bool
+	}
+	return nil
+}
+
+func getMockValueFromOption(field protoreflect.FieldDescriptor, mockType mockpb.MockFieldType) any {
+	switch mockType {
 	case mockpb.MockFieldType_ip, mockpb.MockFieldType_ipv4:
 		switch field.Kind() {
 		case protoreflect.StringKind:
@@ -398,7 +455,7 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
 			protoreflect.Fixed64Kind, protoreflect.Uint64Kind,
 			protoreflect.StringKind:
-			return convertNumeral(Faker().Number(numberLowValue, numberMaxValue), field.Kind())
+			return convertNumeral(Faker().Number(numberLowValue, numberHighValue), field.Kind())
 		}
 	case mockpb.MockFieldType_author:
 		switch field.Kind() {

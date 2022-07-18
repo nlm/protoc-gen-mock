@@ -14,7 +14,9 @@ func normalizeFieldName(name protoreflect.Name) string {
 	return strings.ToLower(sepRemover.Replace(string(name)))
 }
 
-func convertNumeral[T float32 | float64 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T, kind protoreflect.Kind) any {
+func convertNumeral[T float32 | float64 |
+	int | int8 | int16 | int32 | int64 |
+	uint | uint8 | uint16 | uint32 | uint64](value T, kind protoreflect.Kind) any {
 	switch kind {
 	case protoreflect.DoubleKind:
 		return float64(value)
@@ -36,13 +38,20 @@ func convertNumeral[T float32 | float64 | int | int8 | int16 | int32 | int64 | u
 
 // func nameBasedMapEntryMocker(field)
 
-func nameBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
+func nameBasedScalarValueMocker(field protoreflect.FieldDescriptor, fieldOptions protoreflect.ProtoMessage) any {
 	// TODO: handle field.Name == "key" && field.ContainingMessage().IsMapEntry()
 	switch normalizeFieldName(field.Name()) {
 	case "id", "uid", "uuid":
 		switch field.Kind() {
 		case protoreflect.StringKind:
 			return Faker().UUID()
+		case protoreflect.DoubleKind, protoreflect.FloatKind,
+			protoreflect.Sint32Kind, protoreflect.Sint64Kind,
+			protoreflect.Sfixed32Kind, protoreflect.Int32Kind,
+			protoreflect.Sfixed64Kind, protoreflect.Int64Kind,
+			protoreflect.Fixed32Kind, protoreflect.Uint32Kind,
+			protoreflect.Fixed64Kind, protoreflect.Uint64Kind:
+			return convertNumeral(Faker().Number(numberLowValue, numberHighValue), field.Kind())
 		}
 	case "firstname":
 		switch field.Kind() {
@@ -81,7 +90,7 @@ func nameBasedScalarValueMocker(field protoreflect.FieldDescriptor) any {
 		}
 	case "totalcount", "count":
 		if pbutils.IsNumeralKind(field.Kind()) {
-			return convertNumeral(mockRepeatedCount, field.Kind())
+			return convertNumeral(mockDefaultFieldRepeat, field.Kind())
 		}
 	}
 	return nil

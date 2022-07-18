@@ -8,16 +8,18 @@ import (
 )
 
 const mockMaxDepth = 100
-const mockRepeatedCount = 3
+const mockDefaultFieldRepeat = 3
 
+// getRepetitions inspects the field to check if
 func getRepetitions(field protoreflect.FieldDescriptor) int {
 	v := proto.GetExtension(field.Options(), mockpb.E_Repeat).(uint32)
 	if v > 0 {
 		return int(v)
 	}
-	return mockRepeatedCount
+	return mockDefaultFieldRepeat
 }
 
+// newMessage creates a new protobuf message from a MessageDescsriptor
 func newMessage(desc protoreflect.MessageDescriptor) protoreflect.ProtoMessage {
 	mt, err := protoregistry.GlobalTypes.FindMessageByName(desc.FullName())
 	if err != nil {
@@ -41,7 +43,7 @@ func mockList(msg proto.Message, field protoreflect.FieldDescriptor, depth int) 
 		}
 	default:
 		for i := 0; i < getRepetitions(field); i++ {
-			lst.Append(mockScalar(field))
+			lst.Append(mockScalar(field, field.Options()))
 		}
 	}
 }
@@ -59,7 +61,7 @@ func mockMap(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 			mockMessage(m, depth)
 			mapKey = protoreflect.MapKey(protoreflect.ValueOfMessage(m.ProtoReflect()))
 		default:
-			mapKey = protoreflect.MapKey(mockScalar(field.MapKey()))
+			mapKey = protoreflect.MapKey(mockScalar(field.MapKey(), field.Options()))
 		}
 		// Value
 		switch field.MapValue().Kind() {
@@ -68,7 +70,7 @@ func mockMap(msg proto.Message, field protoreflect.FieldDescriptor, depth int) {
 			mockMessage(mapValue.Message().Interface(), depth)
 			// TODO: list / map ?
 		default:
-			mapValue := mockScalar(field.MapValue())
+			mapValue := mockScalar(field.MapValue(), field.Options())
 			mp.Set(mapKey, mapValue)
 		}
 	}
@@ -82,7 +84,7 @@ func mockUnary(msg proto.Message, field protoreflect.FieldDescriptor, depth int)
 		mockMessage(sm, depth)
 		msg.ProtoReflect().Set(field, protoreflect.ValueOf(sm.ProtoReflect()))
 	default:
-		msg.ProtoReflect().Set(field, mockScalar(field))
+		msg.ProtoReflect().Set(field, mockScalar(field, field.Options()))
 	}
 }
 

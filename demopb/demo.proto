@@ -53,13 +53,17 @@ message Person {
   string name  = 2;
   string email = 3;
   Type type = 4;
-  map<string, string> attributes = 5;
+  map<string, string> attributes = 5 [(mockpb.map) = {randkey: uuid, templatevalue: "####-{lastname}"}];
   string hardware = 6 [(mockpb.random) = mac_address];
+  string planet = 7 [(mockpb.const) = {string: "earth"}];
+  uint32 planet_id = 8 [(mockpb.const) = {number: 3}];
+  string planet_id_str = 9 [(mockpb.const) = {number: 3}];
+  string freeform = 10 [(mockpb.template) = "############-{firstname}"]; 
 }
 
 // ListPersonRequests is the request to list the content of the database
 message ListPersonsRequest {
-  google.protobuf.StringValue project_id = 1;
+  google.protobuf.StringValue project_id = 1 [(mockpb.random) = uuid];
 
   // page is an optional field to get a particular page in listings
   google.protobuf.Int32Value page      = 10;
@@ -71,7 +75,7 @@ message ListPersonsRequest {
 message ListPersonsResponse {
   repeated Person persons = 1 [(mockpb.repeat) = 5];
 
-  uint32 total_count = 10 [(mockpb.const) = {uint32: 5}];
+  uint32 total_count = 10 [(mockpb.const) = {number: 5}];
 }
 
 message GetPersonRequest { 

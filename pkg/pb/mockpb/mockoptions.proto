@@ -128,27 +128,31 @@ enum MockFieldType {
 message ConstFieldType {
   oneof value {
     string string = 1;
-    int32  int    = 2;
-    uint32 uint32 = 3;
+    double number = 2;
+    bool   bool   = 3;
   }
 }
 
 message MapFieldType {
-  MockFieldType randomkey = 1;
-  MockFieldType randomvalue = 2;
-  ConstFieldType constkey = 3;
-  ConstFieldType constvalue = 4;
+  oneof key {
+    MockFieldType  randkey     = 1;
+    ConstFieldType constkey    = 2;
+    string         templatekey = 3;
+  }
+  oneof value {
+    MockFieldType  randvalue  = 11;
+    ConstFieldType constvalue = 12;
+    string         templatevalue = 13;
+  }
 }
 
 // https://developers.google.com/protocol-buffers/docs/proto#customoptions
 extend google.protobuf.FieldOptions {
   // Type specify the standard type of a field.
   // On a map field, this annotation will target only the value type.
-  MockFieldType  random          = 90210;
-  ConstFieldType const        = 90211;
-  MapFieldType map = 90212;
-  // MockFieldType mapkeytype    = 90211;
-  // MockFieldType mapvaluetype  = 90212;
-  // string        template      = 90211;
-  uint32 repeat = 90213;
+  MockFieldType  random     = 90210;
+  ConstFieldType const      = 90211;
+  string         template   = 90212;
+  uint32         repeat     = 90213;
+  MapFieldType   map        = 90214;
 }
