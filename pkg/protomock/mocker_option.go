@@ -17,6 +17,22 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor, fieldOptio
 	)
 	// Handle MapEntry
 	mr := proto.GetExtension(fieldOptions, mockpb.E_Rules).(*mockpb.MockRules)
+	if field.Kind() == protoreflect.EnumKind {
+		// Enum
+		var v protoreflect.EnumValueDescriptor
+		if id := mr.GetEnum().GetId(); id != 0 {
+			v = field.Enum().Values().ByNumber(protoreflect.EnumNumber(id))
+		} else if name := mr.GetEnum().GetName(); name != "" {
+			v = field.Enum().Values().ByName(protoreflect.Name(name))
+		} else if rand := mr.GetEnum().GetRand(); rand {
+			idx := Faker().Number(0, field.Enum().Values().Len()-1)
+			v = field.Enum().Values().Get(idx)
+		}
+		if v != nil {
+			return v.Number()
+		}
+		return nil
+	}
 	if field.ContainingMessage().IsMapEntry() {
 		switch field.Name() {
 		case "key":

@@ -137,11 +137,19 @@ message ConstFieldType {
 message MapFieldType {
   MockRules key    = 1;
   MockRules value  = 2;
-  uint32    repeat = 3;
+  int32    repeat = 3;
 }
 
 message ListFieldType {
-  uint32    repeat = 1;
+  int32    repeat = 1;
+}
+
+message EnumFieldType {
+  oneof enum_value {
+    int32    id = 1;
+    string   name = 2;
+    bool     rand = 3;
+  }
 }
 
 message MockRules {
@@ -151,6 +159,7 @@ message MockRules {
     string         template = 3;
     MapFieldType   map = 4;
     ListFieldType  list = 5;
+    EnumFieldType  enum = 6;
   }
 
 }

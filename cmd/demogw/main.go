@@ -26,6 +26,7 @@ func run() error {
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
 				UseProtoNames:   true,
+				UseEnumNumbers:  false,
 				EmitUnpopulated: *flagEmitUnpopulated,
 			},
 			UnmarshalOptions: protojson.UnmarshalOptions{

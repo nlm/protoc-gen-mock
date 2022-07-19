@@ -46,13 +46,24 @@ service Api {
 // Person represents a person
 message Person {
   enum Type {
-    individual = 0;
-    company = 1;
+    unknown_type = 0;
+    individual = 1;
+    company = 2;
+  }
+  enum Animal {
+    unknown_animal = 0;
+    cat = 1;
+    dog = 2;
+    parrot = 3;
+    mouse = 4;
+    capybara = 5;
+    giraffe = 6;
+    sheep = 7;
   }
   string id    = 1 [(mockpb.rules) = {mock: uuid}];
   string name  = 2;
   string email = 3;
-  Type type = 4;
+  Type type = 4 [(mockpb.rules) = {enum: {name: "company"}}];
   map<string, string> attributes = 5 [(mockpb.rules) = {map: {key: {mock: uuid}, value: {template: "####-{lastname}"}}}];
   string hardware = 6 [(mockpb.rules) = {mock: mac_address}];
   string planet = 7 [(mockpb.rules) = {const: {string: "earth"}}];
@@ -60,6 +71,7 @@ message Person {
   string planet_id_str = 9 [(mockpb.rules) = {const: {number: 3}}];
   string freeform = 10 [(mockpb.rules) = {template: "############-{firstname}"}]; 
   bool   active = 11 [(mockpb.rules) = {const: {bool: true}}];
+  Animal animal = 12 [(mockpb.rules) = {enum: {rand: true}}];
 }
 
 // ListPersonRequests is the request to list the content of the database
