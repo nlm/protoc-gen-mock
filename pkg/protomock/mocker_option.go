@@ -16,22 +16,22 @@ func optionBasedScalarValueMocker(field protoreflect.FieldDescriptor, fieldOptio
 		t string
 	)
 	// Handle MapEntry
+	mr := proto.GetExtension(fieldOptions, mockpb.E_Rules).(*mockpb.MockRules)
 	if field.ContainingMessage().IsMapEntry() {
-		m := proto.GetExtension(fieldOptions, mockpb.E_Map).(*mockpb.MapFieldType)
 		switch field.Name() {
 		case "key":
-			c = m.GetConstkey()
-			r = m.GetRandkey()
-			t = m.GetTemplatekey()
+			c = mr.GetMap().GetKey().GetConst()
+			r = mr.GetMap().GetKey().GetMock()
+			t = mr.GetMap().GetKey().GetTemplate()
 		case "value":
-			c = m.GetConstvalue()
-			r = m.GetRandvalue()
-			t = m.GetTemplatevalue()
+			c = mr.GetMap().GetValue().GetConst()
+			r = mr.GetMap().GetValue().GetMock()
+			t = mr.GetMap().GetValue().GetTemplate()
 		}
 	} else {
-		c = proto.GetExtension(fieldOptions, mockpb.E_Const).(*mockpb.ConstFieldType)
-		r = proto.GetExtension(fieldOptions, mockpb.E_Random).(mockpb.MockFieldType)
-		t = proto.GetExtension(fieldOptions, mockpb.E_Template).(string)
+		c = mr.GetConst()
+		r = mr.GetMock()
+		t = mr.GetTemplate()
 	}
 	// Const
 	if v := getConstValueFromOption(field, c); v != nil {

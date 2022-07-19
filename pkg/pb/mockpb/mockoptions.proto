@@ -4,6 +4,7 @@ package mockpb;
 option go_package = "github.com/nlm/protoc-gen-mock/pkg/pb/mockpb;mockpb";
 
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/struct.proto";
 
 // StandardFieldType represents a standard type.
 // These types are useful to provide context to protobuf generators
@@ -134,25 +135,34 @@ message ConstFieldType {
 }
 
 message MapFieldType {
-  oneof key {
-    MockFieldType  randkey     = 1;
-    ConstFieldType constkey    = 2;
-    string         templatekey = 3;
+  MockRules key    = 1;
+  MockRules value  = 2;
+  uint32    repeat = 3;
+}
+
+message ListFieldType {
+  uint32    repeat = 1;
+}
+
+message MockRules {
+  oneof rule {
+    MockFieldType  mock = 1;
+    ConstFieldType const = 2;
+    string         template = 3;
+    MapFieldType   map = 4;
+    ListFieldType  list = 5;
   }
-  oneof value {
-    MockFieldType  randvalue  = 11;
-    ConstFieldType constvalue = 12;
-    string         templatevalue = 13;
-  }
+
 }
 
 // https://developers.google.com/protocol-buffers/docs/proto#customoptions
 extend google.protobuf.FieldOptions {
   // Type specify the standard type of a field.
   // On a map field, this annotation will target only the value type.
-  MockFieldType  random     = 90210;
-  ConstFieldType const      = 90211;
-  string         template   = 90212;
-  uint32         repeat     = 90213;
-  MapFieldType   map        = 90214;
+  MockRules rules = 90210;
+  // MockFieldType  random     = 90210;
+  // ConstFieldType const      = 90211;
+  // string         template   = 90212;
+  // uint32         repeat     = 90213;
+  // MapFieldType   map        = 90214;
 }

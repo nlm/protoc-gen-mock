@@ -12,9 +12,12 @@ const mockDefaultFieldRepeat = 3
 
 // getRepetitions inspects the field to check if
 func getRepetitions(field protoreflect.FieldDescriptor) int {
-	v := proto.GetExtension(field.Options(), mockpb.E_Repeat).(uint32)
-	if v > 0 {
-		return int(v)
+	mr := proto.GetExtension(field.Options(), mockpb.E_Rules).(*mockpb.MockRules)
+	if field.IsMap() && mr.GetMap().GetRepeat() > 0 {
+		return int(mr.GetMap().GetRepeat())
+	}
+	if field.IsList() && mr.GetList().GetRepeat() > 0 {
+		return int(mr.GetList().GetRepeat())
 	}
 	return mockDefaultFieldRepeat
 }
