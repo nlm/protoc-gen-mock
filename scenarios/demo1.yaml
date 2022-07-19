@@ -5,12 +5,15 @@ endpoints:
   ListPersons:
     content:
       persons:
-      - name: "Alice"
+      - id: "f2aeb6b2-d59a-4d91-9349-5122454a05c2"
+        name: "Alice"
         email: "alice@example.com"
         #wtf: "wtf"
-      - name: "Bob"
+      - id: "6e0697a9-d392-425e-b5c6-cedb5fd3f144"
+        name: "Bob"
+        email: "bob@example.com"
       total_count: 2
-  CreatePerson:
+  DeletePerson:
     status:
-      code: 8 # ResourceExhausted
+      code: 7 # PermissionDenied
       message: "oops"

@@ -1,0 +1,177 @@
+syntax = "proto3";
+package mockpb;
+
+option go_package = "github.com/nlm/protoc-gen-mock/pkg/pb/mockpb;mockpb";
+
+import "google/protobuf/descriptor.proto";
+import "google/protobuf/struct.proto";
+
+// StandardFieldType represents a standard type.
+// These types are useful to provide context to protobuf generators
+// and therefore, improve the generation.
+enum MockFieldType {
+  mock_field_type_unknown = 0;
+  // technical
+
+  ip                          = 1;
+  ipv4                        = 2;
+  ipv6                        = 3;
+  size                        = 4;
+  uuid                        = 5;
+  ipnet                       = 6;
+  mac_address                 = 7;
+  url                         = 8;
+
+  useragent                   = 20;
+  domain                      = 21;
+  tld                         = 22;
+  email                       = 23;
+  file_extension              = 24;
+  mime_type                   = 25;
+  http_method                 = 26;
+  http_statuscode             = 27;
+  http_statuscode_simple      = 28;
+  hexcolor                    = 29;
+
+  // images
+  image                       = 40;
+  image_url                   = 41;
+  log_level                   = 42;
+
+  // administrative
+
+  // street_address will generate a random address street string
+  street_address              = 50;
+  // streen_name will generate a random address street name string
+  street_name                 = 51;
+  // street_number will generate a random address street number string
+  street_number               = 52;
+  // street_prefix will generate a random address street prefix string
+  street_prefix               = 53;
+  // street_suffix will generate a random address street suffix string
+  street_suffix               = 54;
+  city                        = 55;
+  country                     = 56;
+  country_short               = 57;
+  creditcard_cvv              = 58;
+  creditcard_number           = 59;
+  creditcard_type             = 60;
+  currency                    = 61;
+  currency_short              = 62;
+  phone_number                = 63;
+
+  language                    = 64;
+  language_short              = 65;
+  language_bcp                = 66;
+  latitude                    = 67;
+  longitude                   = 68;
+  timezone                    = 69;
+  timezone_short              = 70;
+  timezone_offset             = 71;
+  // TimeZoneRegion will select a random region style timezone string, e.g. "America/Chicago"
+  timezone_region             = 72;
+
+  first_name                  = 73;
+  last_name                   = 74;
+  full_name                   = 75;
+  name_prefix                 = 76;
+  us_ssn                      = 77;
+  us_state                    = 78;
+  us_state_short              = 79;
+
+  date                        = 80;
+  year                        = 81;
+  day                         = 82;
+  hour                        = 83;
+  minute                      = 84;
+  second                      = 85;
+  month                       = 86;
+  month_string                = 87;
+  nanosecond                  = 88;
+  date_future                 = 89;
+  date_past                   = 90;
+  date_now                    = 91;
+
+  // native types
+  number                      = 100;
+  // float32                     = 101;
+  // float64                     = 102;
+  // hexuint8                    = 103;
+  // hexuint16                   = 104;
+  // hexuint32                   = 105;
+  // hexuint64                   = 106;
+  // hexuint128                  = 107;
+  // hexuint256                  = 108;
+  // int8                        = 109;
+  // int16                       = 110;
+  // int32                       = 111;
+  // int64                       = 112;
+  // uint8                       = 113;
+  // uint16                      = 114;
+  // uint32                      = 115;
+  // uint64                      = 116;
+
+  // misc
+  author                      = 120;
+  app_name                    = 121;
+  version                     = 122;
+  color                       = 123;
+  company                     = 124;
+  emoji                       = 125;
+  emoji_alias                 = 126;
+  lorem_ipsum                 = 127;
+  password                    = 128;
+  phrase                      = 129;
+  price                       = 130;
+  job_title                   = 131;
+}
+
+message ConstFieldType {
+  oneof value {
+    string string = 1;
+    double number = 2;
+    bool   bool   = 3;
+  }
+}
+
+message MapFieldType {
+  MockRules key    = 1;
+  MockRules value  = 2;
+  int32    repeat = 3;
+}
+
+message ListFieldType {
+  int32    repeat = 1;
+}
+
+message EnumFieldType {
+  oneof enum_value {
+    int32    id = 1;
+    string   name = 2;
+    bool     rand = 3;
+  }
+}
+
+message MockRules {
+  oneof rule {
+    MockFieldType  mock = 1;
+    ConstFieldType const = 2;
+    string         template = 3;
+    MapFieldType   map = 4;
+    ListFieldType  list = 5;
+    EnumFieldType  enum = 6;
+  }
+
+}
+
+// https://developers.google.com/protocol-buffers/docs/proto#customoptions
+extend google.protobuf.FieldOptions {
+  // Type specify the standard type of a field.
+  // On a map field, this annotation will target only the value type.
+  MockRules rules = 90210;
+  // MockFieldType  random     = 90210;
+  // ConstFieldType const      = 90211;
+  // string         template   = 90212;
+  // uint32         repeat     = 90213;
+  // MapFieldType   map        = 90214;
+}

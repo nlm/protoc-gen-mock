@@ -7,21 +7,26 @@ option go_package = ".;demopb";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
+import "mockpb/mockoptions.proto";
 
+// Api is the main service
 service Api {
 
+  // ListPersons lists the persons present in the database.
   rpc ListPersons(ListPersonsRequest) returns (ListPersonsResponse) {
     option (google.api.http) = {
       get: "/api/v1/persons"
     };
   }
 
+  // GetPerson retrives one person from the database.
   rpc GetPerson(GetPersonRequest) returns (Person) {
     option (google.api.http) = {
       get: "/api/v1/persons/{person_id}"
     };
   }
 
+  // CreatePerson creates a new person and stores it in the database.
   rpc CreatePerson(CreatePersonRequest) returns (Person) {
     option (google.api.http) = {
       post: "/api/v1/persons"
@@ -29,6 +34,7 @@ service Api {
     };
   }
 
+  // DeletePerson remove a person from the database
   rpc DeletePerson(DeletePersonRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/api/v1/persons/{person_id}"
@@ -37,28 +43,52 @@ service Api {
 
 }
 
+// Person represents a person
 message Person {
   enum Type {
-    individual = 0;
-    company = 1;
+    unknown_type = 0;
+    individual = 1;
+    company = 2;
   }
-  string id    = 1;
+  enum Animal {
+    unknown_animal = 0;
+    cat = 1;
+    dog = 2;
+    parrot = 3;
+    mouse = 4;
+    capybara = 5;
+    giraffe = 6;
+    sheep = 7;
+  }
+  string id    = 1 [(mockpb.rules) = {mock: uuid}];
   string name  = 2;
   string email = 3;
-  Type type = 4;
+  Type type = 4 [(mockpb.rules) = {enum: {name: "company"}}];
+  map<string, string> attributes = 5 [(mockpb.rules) = {map: {key: {mock: uuid}, value: {template: "####-{lastname}"}}}];
+  string hardware = 6 [(mockpb.rules) = {mock: mac_address}];
+  string planet = 7 [(mockpb.rules) = {const: {string: "earth"}}];
+  uint32 planet_id = 8 [(mockpb.rules) = {const: {number: 3}}];
+  string planet_id_str = 9 [(mockpb.rules) = {const: {number: 3}}];
+  string freeform = 10 [(mockpb.rules) = {template: "############-{firstname}"}]; 
+  bool   active = 11 [(mockpb.rules) = {const: {bool: true}}];
+  Animal animal = 12 [(mockpb.rules) = {enum: {rand: true}}];
 }
 
+// ListPersonRequests is the request to list the content of the database
 message ListPersonsRequest {
-  google.protobuf.StringValue project_id = 1;
+  google.protobuf.StringValue project_id = 1 [(mockpb.rules) = {mock: uuid}];
 
+  // page is an optional field to get a particular page in listings
   google.protobuf.Int32Value page      = 10;
+  // page_size is an optional field to set the page size in listings
   google.protobuf.Int32Value page_size = 11;
 }
 
+// ListPersonsReponse is the result sent back from the listing
 message ListPersonsResponse {
-  repeated Person persons = 1;
+  repeated Person persons = 1 [(mockpb.rules) = {list: {repeat: 5}}];
 
-  uint32 total_count = 10;
+  uint32 total_count = 10 [(mockpb.rules) = {const: {number: 5}}];
 }
 
 message GetPersonRequest { 
@@ -66,7 +96,7 @@ message GetPersonRequest {
 }
 
 message CreatePersonRequest {
-  google.protobuf.StringValue project_id = 1;
+  google.protobuf.StringValue project_id = 1 [(mockpb.rules) = {mock: uuid}];
   Person person = 2;
 }
 
